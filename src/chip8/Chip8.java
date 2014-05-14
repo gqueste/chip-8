@@ -53,8 +53,8 @@ public class Chip8 {
 				}
 				else if (opcode == 0x00EE){
 					//returns from a subroutine
-					this.SP --;
 					this.PC = this.stack[this.SP];
+					this.SP --;
 					this.PC += 2;
 				}
 			}
@@ -66,8 +66,12 @@ public class Chip8 {
 			break;
 			
 		case 0x2000:
-			//TODO Appel d'une sous routine
+			//Appel d'une sous routine
+			SP++;
+			stack[SP] = PC;
+			PC = (short)(opcode & 0x0FFF);
 			break;
+			
 		case 0x3000:
 			//TODO Skip si egale
 			break;
