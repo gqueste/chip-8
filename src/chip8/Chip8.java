@@ -3,16 +3,19 @@ package chip8;
 public class Chip8 {
 
 	private int PC;
-	private int SP;
-	private String I;
-	private int[] V;
+	private byte SP;
+	private short I;
+	private byte[] V;
 	private byte[][] display;
+	private int[] stack;
 	
 	/**
 	 * Constructeur
 	 */
 	public Chip8(){
 		PC = 0;
+		this.SP = 0;
+		this.setStack(new int[16]);
 		display = initDisplay();
 	}
 
@@ -36,19 +39,35 @@ public class Chip8 {
 		int first = opcode & 0xF000;
 		
 		
-		switch (opcode) {
+		switch (first) {
 		case 0x0000 :
-			//TODO Appel d'un programme une Addresse
+			if(x != 0x0000) {
+				//TODO Appel d'un programme une Addresse ??
+				System.out.println("Instruction non reconnue");
+			}
+			else {
+				if(opcode == 0x00E0) {
+					//clear the screen
+					this.display = initDisplay();
+					this.PC += 2;
+				}
+				else if (opcode == 0x00EE){
+					//returns from a subroutine
+					this.SP --;
+					this.PC = this.stack[this.SP];
+					this.PC += 2;
+				}
+			}
 			break;
-		/*case 0x00E0:
-			this.display = initDisplay();
-			this.PC += 2;
-			break;*/
+
 		case 0x1000:
-			//TODO saut Ã  une addresse
+			// saut à une addresse
+			PC = (opcode & 0x0FFF);			
 			break;
+			
 		case 0x2000:
 			//TODO Appel d'une sous routine
+			break;
 		case 0x3000:
 			//TODO Skip si egale
 			break;
@@ -104,27 +123,27 @@ public class Chip8 {
 		PC = pC;
 	}
 
-	public int getSP() {
+	public byte getSP() {
 		return SP;
 	}
 
-	public void setSP(int sP) {
+	public void setSP(byte sP) {
 		SP = sP;
 	}
 
-	public String getI() {
+	public short getI() {
 		return I;
 	}
 
-	public void setI(String i) {
+	public void setI(short i) {
 		I = i;
 	}
 
-	public int[] getV() {
+	public byte[] getV() {
 		return V;
 	}
 
-	public void setV(int[] v) {
+	public void setV(byte[] v) {
 		V = v;
 	}
 	
@@ -134,6 +153,14 @@ public class Chip8 {
 
 	public void setDisplay(byte[][] display) {
 		this.display = display;
+	}
+
+	public int[] getStack() {
+		return stack;
+	}
+
+	public void setStack(int[] stack) {
+		this.stack = stack;
 	}
 
 }
