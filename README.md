@@ -1,4 +1,4 @@
 # This is my README
 Gwénaël Provost
-Gabriel Quieste
+Gabriel Queste
 Quentin Victoor
