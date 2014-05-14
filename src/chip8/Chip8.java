@@ -84,8 +84,15 @@ public class Chip8 {
 			break;
 			
 		case 0x4000:
-			//TODO Skip si pas egale
+			//Skip si pas egale
+			if(V[x] != (byte)kk) {
+				PC += 4;
+			}
+			else {
+				PC += 2;
+			}
 			break;
+			
 		case 0x5000:
 			//TODO Skip si egale
 			break;

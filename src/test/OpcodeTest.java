@@ -100,5 +100,24 @@ public class OpcodeTest {
 		chip8.opcode(0x3444);
 		assertNotEquals("PC incrémenté 2 fois", pcTemoin + 4, this.chip8.getPC());
 	}
+	
+	@Test
+	public void test4NNN() {
+		byte[] VTemoin = new byte[16];	
+		
+		//Test Valide
+		pcTemoin = chip8.getPC();
+		VTemoin[4] = (byte) 0x0045;
+		chip8.setV(VTemoin);
+		chip8.opcode(0x4444);
+		assertEquals("PC non incrémenté 2 fois", pcTemoin + 4, this.chip8.getPC());
+		
+		//test Non valide
+		pcTemoin = chip8.getPC();
+		VTemoin[4] = (byte) 0x0044;
+		chip8.setV(VTemoin);
+		chip8.opcode(0x4444);
+		assertEquals("PC mal incrémenté", pcTemoin + 2, this.chip8.getPC());
+	}
 
 }
