@@ -31,5 +31,106 @@ public class OpcodeTest {
 		assertEquals("L'écran doit etre nettoyé",this.displayTemoin, chip8.getDisplay());
 		assertEquals("PC n'' a pas été incrémenté", pcTemoin+2, chip8.getPC());
 	}
+	
+//	@Test
+//	public void test8XY0(){
+//		int x = chip8.getV()[X];
+//		int y = chip8.getV()[Y];
+//		
+//		chip8.opcode(0x8XY0);
+//		
+//		assertEquals(y, chip8.getV()[X]);
+//	}
+//	
+//	@Test
+//	public void test8XY1(){
+//		int x = chip8.getV()[X];
+//		int y = chip8.getV()[Y];
+//		int res = x || y;
+//		
+//		chip8.opcode(0x8XY1);
+//		
+//		assertEquals(y, chip8.getV()[X]);
+//	}
+//	
+//	@Test
+//	public void test8XY2(){
+//		int x = chip8.getV()[X];
+//		int y = chip8.getV()[Y];
+//		
+//		chip8.opcode(0x8XY2);
+//		
+//		assertEquals(y, chip8.getV()[X]);
+//	}
+//	
+//	@Test
+//	public void test8XY3(){
+//		int x = chip8.getV()[X];
+//		int y = chip8.getV()[Y];
+//		
+//		chip8.opcode(0x8XY3);
+//		
+//		assertEquals(y, chip8.getV()[X]);
+//	}
+//	
+//	@Test
+//	public void test8XY4(){
+//		int x = chip8.getV()[X];
+//		int y = chip8.getV()[Y];
+//		
+//		chip8.opcode(0x8XY4);
+//		
+//		assertEquals(y, chip8.getV()[X]);
+//	}
+//	
+//	@Test
+//	public void test8XY5(){
+//		int x = chip8.getV()[X];
+//		int y = chip8.getV()[Y];
+//		
+//		chip8.opcode(0x8XY0);
+//		
+//		assertEquals(y, chip8.getV()[X]);
+//	}
+//	
+//	@Test
+//	public void test8XY6(){
+//		int x = chip8.getV()[X];
+//		int y = chip8.getV()[Y];
+//		
+//		chip8.opcode(0x8XY0);
+//		
+//		assertEquals(y, chip8.getV()[X]);
+//	}
+//	
+//	@Test
+//	public void test8XY7(){
+//		int x = chip8.getV()[X];
+//		int y = chip8.getV()[Y];
+//		
+//		chip8.opcode(0x8XY0);
+//		
+//		assertEquals(y, chip8.getV()[X]);
+//	}
+//	
+//	@Test
+//	public void test8XYE(){
+//		int x = chip8.getV()[X];
+//		int y = chip8.getV()[Y];
+//		
+//		chip8.opcode(0x8XY0);
+//		
+//		assertEquals(y, chip8.getV()[X]);
+//	}
+//	
+//	@Test
+//	public void test9XY0(){
+//		
+//	}
+//	
+//	@Test
+//	public void testANNN(){
+//		
+//	}
 
 }
