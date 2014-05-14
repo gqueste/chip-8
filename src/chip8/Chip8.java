@@ -3,9 +3,9 @@ package chip8;
 public class Chip8 {
 
 	private int PC;
-	private String SP;
+	private int SP;
 	private String I;
-	private String[] V;
+	private int[] V;
 	private byte[][] display;
 	
 	/**
@@ -27,17 +27,23 @@ public class Chip8 {
 	}
 
 	public void opcode(int opcode){
+		
+		int x = ((opcode & 0x0F00) >> 8);
+		int y = ((opcode & 0x00F0) >> 4);
+		int kk = (opcode & 0x00FF);
+		int nnn = (opcode & 0x0FFF);
+		
+		int first = opcode & 0xF000;
+		
+		
 		switch (opcode) {
 		case 0x0000 :
 			//TODO Appel d'un programme une Addresse
 			break;
-		case 0x00E0:
+		/*case 0x00E0:
 			this.display = initDisplay();
 			this.PC += 2;
-			break;
-		case 0x00EE:
-			//TODO Retourn d'une sous routine
-			break;
+			break;*/
 		case 0x1000:
 			//TODO saut à une addresse
 			break;
@@ -48,62 +54,40 @@ public class Chip8 {
 			break;
 		case 0x4000:
 			//TODO Skip si pas egale
+			break;
 		case 0x5000:
 			//TODO Skip si egale
+			break;
 		case 0x6000:
 			//TODO Set de x
+			break;
 		case 0x7000:
 			//TODO Add to x
+			break;
 		case 0x8000:
 			//TODO setter
-		case 0x8001:
-			//TODO setter
-		case 0x8002:
-			//TODO setter
-		case 0x8003:
-			//TODO setter
-		case 0x8004:
-			//TODO addition
-		case 0x8005:
-			//TODO soustraction
-		case 0x8006:
-			//TODO Shift
-		case 0x8007:
-			//TODO Setter
-		case 0x800E:
-			//TODO Shift
+			break;
 		case 0x9000:
 			//TODO Skips
+			break;
 		case 0xA000:
 			//TODO
+			break;
 		case 0xB000:
 			//TODO
+			break;
 		case 0xC000:
 			//TODO
+			break;
 		case 0xD000:
 			//TODO
-		case 0xE09E:
+			break;
+		case 0xE000:
 			//TODO
-		case 0xE0A1:
+			break;
+		case 0xF000:
 			//TODO
-		case 0xF007:
-			//TODO
-		case 0xF00A:
-			//TODO
-		case 0xF015:
-			//TODO
-		case 0xF018:
-			//TODO
-		case 0xF01E:
-			//TODO
-		case 0xF029:
-			//TODO
-		case 0xF033:
-			//TODO
-		case 0xF055:
-			//TODO
-		case 0xF065:
-			//TODO
+			break;
 		default:
 			break;
 		}
@@ -120,11 +104,11 @@ public class Chip8 {
 		PC = pC;
 	}
 
-	public String getSP() {
+	public int getSP() {
 		return SP;
 	}
 
-	public void setSP(String sP) {
+	public void setSP(int sP) {
 		SP = sP;
 	}
 
@@ -136,11 +120,11 @@ public class Chip8 {
 		I = i;
 	}
 
-	public String[] getV() {
+	public int[] getV() {
 		return V;
 	}
 
-	public void setV(String[] v) {
+	public void setV(int[] v) {
 		V = v;
 	}
 	
