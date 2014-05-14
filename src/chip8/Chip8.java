@@ -16,6 +16,7 @@ public class Chip8 {
 		PC = 0;
 		this.SP = 0;
 		this.setStack(new int[16]);
+		this.V = new byte[16];
 		display = initDisplay();
 	}
 
@@ -73,8 +74,15 @@ public class Chip8 {
 			break;
 			
 		case 0x3000:
-			//TODO Skip si egale
+			//Skip si egale
+			if(V[x] == (byte)kk) {
+				PC += 4;
+			}
+			else {
+				PC += 2;
+			}
 			break;
+			
 		case 0x4000:
 			//TODO Skip si pas egale
 			break;
