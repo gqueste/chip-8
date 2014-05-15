@@ -3,6 +3,8 @@ package chip8;
 import java.util.Random;
 
 public class Chip8 {
+	
+	//private final int LIMIT_NUMBER-INSTRUCTION;
 
 	private int PC, delay_timer, sound_timer, instruction_count;
 	private byte SP,key;
@@ -12,16 +14,30 @@ public class Chip8 {
 	private int[] stack;
 	private Random random;
 	private Touche input;
+	
+	// Attributs relatifs au temps et rythme d'interprétation des instructions
+	double rate, per, allowance;
+	long current, passed, last_checked;
+	
 	/**
 	 * Constructeur
 	 */
 	public Chip8(){
-		PC = 0;
+		this.PC = 0;
 		this.SP = 0;
 		this.setStack(new int[16]);
 		this.V = new byte[16];
 		this.random = new Random(567765);
 		this.memory = new byte[4096];
+
+		// 14 instructions pour 100 ms
+		rate = 14;
+		per = 100;
+		allowance = rate;
+		last_checked = System.currentTimeMillis();
+
+
+		
 		display = initDisplay();
 	}
 	
@@ -69,7 +85,52 @@ public class Chip8 {
 		}
 		return screen;
 	}
+	
+	/**
+	 * Détermine s'il y a suffisamment de temps pour interpréter
+	 * une nouvelle opération
+	 * @return boolean, True si une nouvelle instruction ne peut pas être lue
+	 */
+	public boolean limitationNbreOperations() {
+		current = System.currentTimeMillis();
+		passed = current - last_checked;
+		last_checked = current;
+		allowance += passed * (rate / per);
 
+		if(allowance > rate)
+			allowance = rate;
+
+		if(allowance < 1.0) {
+			return true;
+		}
+		else
+		{
+			allowance -= 1.0;
+			return false;
+		}
+	}
+	
+	/**
+	 * Controle l'exécution de l'interpreter
+	 * Limite le nombre d'exécutions lues
+	 * Récupère le code depuis la mémoire
+	 * Met à jour les delay et sound timers
+	 */
+	public void lire() {
+		if(limitationNbreOperations()) {
+			return;
+		}
+		
+		if(instruction_count == 5){
+			instruction_count = 0;
+		}
+		
+		
+		//short opCodeLu = ;
+		
+		
+	}
+	
 	/**
 	 * Interprète le code d'opération reçu
 	 * @param opcode, int
@@ -82,6 +143,7 @@ public class Chip8 {
 		int nnn = (opcode & 0x0FFF);
 
 		int first = opcode & 0xF000;
+		int last = opcode & 0x000F;
 
 
 		switch (first) {
@@ -166,6 +228,66 @@ public class Chip8 {
 			
 		case 0x8000:
 			//TODO setter
+			byte vx = this.V[x];
+			byte vy = this.V[y];
+			if(last == 0x0000){
+				this.V[x] = vy;
+			}
+			else if(last == 0x0001){
+				this.V[x] = (byte) (vx | vy);
+			}
+			else if(last == 0x0002){
+				this.V[x] = (byte) (vx & vy);
+			}
+			else if(last == 0x0003){
+				this.V[x] = (byte) (vx ^ vy);
+			}
+			else if(last == 0x0004){
+				byte res = (byte) (vx + vy);
+				if(res > 255){
+					this.V[15] = 1;
+				}
+				else{
+					this.V[15] = 0;
+				}
+			}
+			else if(last == 0x0005){
+				if(vx > vy){
+					this.V[15] = 1;
+				}
+				else{
+					this.V[15] = 0;
+				}
+				this.V[x] = (byte) (vx - vy);
+			}
+			else if(last == 0x0006){
+				byte lastOfVX = (byte) (this.V[x] & 0x000F);
+				if(lastOfVX == 1){
+					this.V[15] = 1;
+				}
+				else{
+					this.V[15] = 0;
+				}
+			}
+			else if(last == 0x0007){
+				if(vy > vx){
+					this.V[15] = 1;
+				}
+				else{
+					this.V[15] = 0;
+				}
+				this.V[x] = (byte) (vy - vx);
+			}
+			else if(last == 0x000E){
+				if(vx > 7){
+					this.V[15] = 1;
+				}
+				else{
+					this.V[15] = 0;
+				}
+				this.V[x] *= 2;
+			}
+			this.PC += 2;
 			break;
 		case 0x9000:
 			//TODO Skips
@@ -175,13 +297,21 @@ public class Chip8 {
 			break;
 		case 0xB000:
 			/**
+<<<<<<< HEAD
 			 * BNNN : Instruction pour sauter à l'adresse NNN depuis le registre v0 
+=======
+			 * BNNN : Instruction pour sauter � l'adresse NNN depuis le registre v0 
+>>>>>>> branch 'master' of https://Inox117@bitbucket.org/Inox117/chip-8.git
 			 */
 			PC = nnn+V[0];
 			break;
 		case 0xC000:
 			/**
+<<<<<<< HEAD
 			 * CXKK Generer un byte aléatoire pour le registre Vx et y ajouter KK
+=======
+			 * CXKK Generer un byte al�atoire pour le registre Vx et y ajouter KK
+>>>>>>> branch 'master' of https://Inox117@bitbucket.org/Inox117/chip-8.git
 			 */
 			V[x] = (byte)(random.nextInt(255)&kk);
 			PC += 2;
