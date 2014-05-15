@@ -7,7 +7,7 @@ public class Chip8 {
 	private int PC, delay_timer, sound_timer, instruction_count;;
 	private byte SP,key;
 	private short I;
-	private byte[] memoire,V;
+	private byte[] V, memory;
 	private byte[][] display;
 	private int[] stack;
 	private Random random;
@@ -20,12 +20,47 @@ public class Chip8 {
 		this.SP = 0;
 		this.setStack(new int[16]);
 		this.V = new byte[16];
-		this.memoire = new byte[4096];
 		this.random = new Random(567765);
+		this.memory = new byte[4096];
 		display = initDisplay();
 	}
+	
+	/**
+	 * Charge la mémoire avec les font sprites
+	 * Place le CP à 0x200
+	 */
+	public void loadMemory() {
+		
+		// Set the font sprites
+		int[] font = {
+				0xF0, 0x90, 0x90, 0x90, 0xF0,
+				0x20, 0x60, 0x20, 0x20, 0x70,
+				0xF0, 0x10, 0xF0, 0x80, 0xF0,
+				0xF0, 0x10, 0xF0, 0x10, 0xF0,
+				0x90, 0x90, 0xF0, 0x10, 0x10,
+				0xF0, 0x80, 0xF0, 0x10, 0xF0,
+				0xF0, 0x80, 0xF0, 0x90, 0xF0,
+				0xF0, 0x10, 0x20, 0x40, 0x40,
+				0xF0, 0x90, 0xF0, 0x90, 0xF0,
+				0xF0, 0x90, 0xF0, 0x10, 0xF0,
+				0xF0, 0x90, 0xF0, 0x90, 0x90,
+				0xE0, 0x90, 0xE0, 0x90, 0xE0,
+				0xF0, 0x80, 0x80, 0x80, 0xF0,
+				0xE0, 0x90, 0x90, 0x90, 0xE0,
+				0xF0, 0x80, 0xF0, 0x80, 0xF0,
+				0xF0, 0x80, 0xF0, 0x80, 0x80
+		};
+		for(int x = 0; x < font.length; x++) {
+			memory[x] = (byte)font[x];
+		}
+		PC = 0x200;		
+	}
 
-	private byte[][] initDisplay() {
+	/**
+	 * Initialise l'écran
+	 * @return display, l'écran initialisé
+	 */
+	public byte[][] initDisplay() {
 		byte[][] screen = new byte[64][32];
 		for(int i=0;i<64;i++){
 			for(int j=0;j<32;j++){
@@ -35,6 +70,10 @@ public class Chip8 {
 		return screen;
 	}
 
+	/**
+	 * Interprète le code d'opération reçu
+	 * @param opcode, int
+	 */
 	public void opcode(int opcode){
 
 		int x = ((opcode & 0x0F00) >> 8);
@@ -49,75 +88,82 @@ public class Chip8 {
 		case 0x0000 :
 			if(x != 0x0000) {
 				//TODO Appel d'un programme une Addresse ?? abandonné par les interpreter modernes
+				System.out.println("Opcode non reconnu : " + String.format("%02X", opcode));
 			}
 			else {
 				if(opcode == 0x00E0) {
 					//clear the screen
 					this.display = initDisplay();
-					this.PC ++;
+					this.PC += 2;
 				}
 				else if (opcode == 0x00EE){
 					//returns from a subroutine
 					this.PC = this.stack[this.SP];
 					this.SP --;
-					this.PC ++;
+					this.PC += 2;
 				}
 			}
 			break;
 
 		case 0x1000:
-			// saut à une addresse
+			// Jump to adress
 			PC = (opcode & 0x0FFF);			
 			break;
 
 		case 0x2000:
-			//Appel d'une sous routine
-			SP++;
+			// Call a subroutine
+			SP+=2;
 			stack[SP] = PC;
 			PC = (short)(opcode & 0x0FFF);
 			break;
 
 		case 0x3000:
-			//Skip si egale
+			//Skip if equal
 			if(V[x] == (byte)kk) {
-				PC += 2;
+				PC += 4;
 			}
 			else {
-				PC ++;
+				PC +=2;
 			}
 			break;
 
 		case 0x4000:
-			//Skip si pas egale
+			//Skip if not equal
 			if(V[x] != (byte)kk) {
-				PC += 2;
+				PC += 4;
 			}
 			else {
-				PC ++;
+				PC +=2;
 			}
 			break;
 
 		case 0x5000:
 			if((opcode & 0x000F) == 0x0000) {
-				//Skip si Vx = Vy
+				//Skip if Vx = Vy
 				if(V[x] == V[y]) {
-					PC += 2;
+					PC += 4;
 				}
 				else {
-					PC ++;
+					PC += 2;
 				}
+			}
+			else {
+				System.out.println("Opcode non reconnu : " + String.format("%02X", opcode));
 			}
 			break;
 
 		case 0x6000:
-			//Set de Vx
+			//Set of Vx
 			V[x] = (byte) kk;
-			PC ++;
+			PC += 2;
 			break;
 
 		case 0x7000:
-			//TODO Add to x
+			//Add to x
+			V[x] += (byte) kk;
+			PC += 2;
 			break;
+			
 		case 0x8000:
 			//TODO setter
 			break;
@@ -154,7 +200,7 @@ public class Chip8 {
 
 			//Boucle d'affichage
 			for(int axeY = 0; axeY < nbByte; axeY++){
-				int pixel = memoire[I+axeY];
+				int pixel = memory[I+axeY];
 				for(int axeX = 0 ; axeX<8 ; axeX++){
 					//On v�rifie que le pixel n'est pas hors de "l ecran"
 					if((pixel & (0x80>>axeX)) != 0 ){
@@ -281,6 +327,14 @@ public class Chip8 {
 
 	public void setStack(int[] stack) {
 		this.stack = stack;
+	}
+
+	public byte[] getMemory() {
+		return memory;
+	}
+
+	public void setMemory(byte[] memory) {
+		this.memory = memory;
 	}
 
 }
