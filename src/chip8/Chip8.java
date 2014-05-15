@@ -114,8 +114,11 @@ public class Chip8 {
 			break;
 			
 		case 0x7000:
-			//TODO Add to x
+			//Add to x
+			V[x] += (byte) kk;
+			PC += 2;
 			break;
+			
 		case 0x8000:
 			//TODO setter
 			break;

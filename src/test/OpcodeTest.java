@@ -168,4 +168,16 @@ public class OpcodeTest {
 		assertEquals("PC non incrémenté", pcTemoin+2, this.chip8.getPC());
 		assertEquals("Vx non modifié", 0x0044, this.chip8.getV()[3]);
 	}
+	
+	@Test
+	public void test7NNN() {
+		byte[] VTemoin = new byte[16];	
+		byte VxTemoin = (byte) 0x0001;
+		VTemoin[3] = VxTemoin;
+		pcTemoin = chip8.getPC();
+		chip8.setV(VTemoin);
+		chip8.opcode(0x7304);
+		assertEquals("PC non incrémenté", pcTemoin+2, this.chip8.getPC());
+		assertEquals("Vx non modifié", (0x0004 + 0x0001), this.chip8.getV()[3]);
+	}
 }
