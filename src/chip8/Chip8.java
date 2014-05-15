@@ -16,6 +16,7 @@ public class Chip8 {
 		PC = 0;
 		this.SP = 0;
 		this.setStack(new int[16]);
+		this.V = new byte[16];
 		display = initDisplay();
 	}
 
@@ -53,8 +54,8 @@ public class Chip8 {
 				}
 				else if (opcode == 0x00EE){
 					//returns from a subroutine
-					this.SP --;
 					this.PC = this.stack[this.SP];
+					this.SP --;
 					this.PC += 2;
 				}
 			}
@@ -66,14 +67,32 @@ public class Chip8 {
 			break;
 			
 		case 0x2000:
-			//TODO Appel d'une sous routine
+			//Appel d'une sous routine
+			SP++;
+			stack[SP] = PC;
+			PC = (short)(opcode & 0x0FFF);
 			break;
+			
 		case 0x3000:
-			//TODO Skip si egale
+			//Skip si egale
+			if(V[x] == (byte)kk) {
+				PC += 4;
+			}
+			else {
+				PC += 2;
+			}
 			break;
+			
 		case 0x4000:
-			//TODO Skip si pas egale
+			//Skip si pas egale
+			if(V[x] != (byte)kk) {
+				PC += 4;
+			}
+			else {
+				PC += 2;
+			}
 			break;
+			
 		case 0x5000:
 			//TODO Skip si egale
 			break;
