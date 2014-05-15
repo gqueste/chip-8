@@ -3,6 +3,8 @@ package chip8;
 import java.util.Random;
 
 public class Chip8 {
+	
+	//private final int LIMIT_NUMBER-INSTRUCTION;
 
 	private int PC, delay_timer, sound_timer, instruction_count;
 	private byte SP,key;
@@ -12,16 +14,30 @@ public class Chip8 {
 	private int[] stack;
 	private Random random;
 	private Touche input;
+	
+	// Attributs relatifs au temps et rythme d'interprÃ©tation des instructions
+	double rate, per, allowance;
+	long current, passed, last_checked;
+	
 	/**
 	 * Constructeur
 	 */
 	public Chip8(){
-		PC = 0;
+		this.PC = 0;
 		this.SP = 0;
 		this.setStack(new int[16]);
 		this.V = new byte[16];
 		this.random = new Random(567765);
 		this.memory = new byte[4096];
+
+		// 14 instructions pour 100 ms
+		rate = 14;
+		per = 100;
+		allowance = rate;
+		last_checked = System.currentTimeMillis();
+
+
+		
 		display = initDisplay();
 	}
 	
@@ -68,6 +84,51 @@ public class Chip8 {
 			}
 		}
 		return screen;
+	}
+	
+	/**
+	 * DÃ©termine s'il y a suffisamment de temps pour interprÃ©ter
+	 * une nouvelle opÃ©ration
+	 * @return boolean, True si une nouvelle instruction ne peut pas Ãªtre lue
+	 */
+	public boolean limitationNbreOperations() {
+		current = System.currentTimeMillis();
+		passed = current - last_checked;
+		last_checked = current;
+		allowance += passed * (rate / per);
+
+		if(allowance > rate)
+			allowance = rate;
+
+		if(allowance < 1.0) {
+			return true;
+		}
+		else
+		{
+			allowance -= 1.0;
+			return false;
+		}
+	}
+	
+	/**
+	 * Controle l'exÃ©cution de l'interpreter
+	 * Limite le nombre d'exÃ©cutions lues
+	 * RÃ©cupÃ¨re le code depuis la mÃ©moire
+	 * Met Ã  jour les delay et sound timers
+	 */
+	public void lire() {
+		if(limitationNbreOperations()) {
+			return;
+		}
+		
+		if(instruction_count == 5){
+			instruction_count = 0;
+		}
+		
+		
+		//short opCodeLu = ;
+		
+		
 	}
 	
 	/**
@@ -244,13 +305,13 @@ public class Chip8 {
 			break;
 		case 0xB000:
 			/**
-			 * BNNN : Instruction pour sauter à l'adresse NNN depuis le registre v0 
+			 * BNNN : Instruction pour sauter ï¿½ l'adresse NNN depuis le registre v0 
 			 */
 			PC = nnn+V[0];
 			break;
 		case 0xC000:
 			/**
-			 * CXKK Generer un byte aléatoire pour le registre Vx et y ajouter KK
+			 * CXKK Generer un byte alï¿½atoire pour le registre Vx et y ajouter KK
 			 */
 			V[x] = (byte)(random.nextInt(255)&kk);
 			PC += 2;
@@ -271,7 +332,7 @@ public class Chip8 {
 			for(int axeY = 0; axeY < nbByte; axeY++){
 				int pixel = memory[I+axeY];
 				for(int axeX = 0 ; axeX<8 ; axeX++){
-					//On vérifie que le pixel n'est pas hors de "l ecran"
+					//On vï¿½rifie que le pixel n'est pas hors de "l ecran"
 					if((pixel & (0x80>>axeX)) != 0 ){
 						if((xPlace & axeX)>63){
 							continue;
@@ -290,11 +351,11 @@ public class Chip8 {
 			break;
 		case 0xE000:
 			/**
-			 * Instruction commençant par un E
+			 * Instruction commenï¿½ant par un E
 			 */
-			// on récupère le reste de l'instruction
+			// on rï¿½cupï¿½re le reste de l'instruction
 			if(kk == 0x9E){
-				//On skip si la bonne touche est pressée
+				//On skip si la bonne touche est pressï¿½e
 				key = input.getInput();
 				if(V[x]==key){
 					PC+=4;
@@ -302,7 +363,7 @@ public class Chip8 {
 					PC+=2;
 				}
 			}else if(kk == 0xA1){
-				//On skip si la bonne touche n est pas pressée
+				//On skip si la bonne touche n est pas pressï¿½e
 				key = input.getInput();
 				if(V[x]==key){
 					PC+=2;
@@ -318,12 +379,12 @@ public class Chip8 {
 			kk = (short)(opcode & 0x00FF);
 			switch(kk){
 			case 0x07:
-				//On set la valeur du Vx à celle du delay_timer
+				//On set la valeur du Vx ï¿½ celle du delay_timer
 				V[x] = (byte)delay_timer;
 				break;
 			case 0x0A:
-				//On récupère une valeur d'input et on la stocke dans Vx
-				//Petite boucle pour éviter une boucle infinie qui rend impossible la récupération de l'input
+				//On rï¿½cupï¿½re une valeur d'input et on la stocke dans Vx
+				//Petite boucle pour ï¿½viter une boucle infinie qui rend impossible la rï¿½cupï¿½ration de l'input
 				do{
 					key = input.getInput();
 					try {
@@ -336,7 +397,7 @@ public class Chip8 {
 				V[x] = key;
 				break;
 			case 0x15:
-				// On set le delay_timer à Vx
+				// On set le delay_timer ï¿½ Vx
 				break;
 			default:
 				break;
