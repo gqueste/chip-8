@@ -25,6 +25,12 @@ public class OpcodeTest {
 			}
 		}
 	}
+	
+	@Test
+	public void testloadMemory() {
+		this.chip8.loadMemory();
+		assertEquals("PC n'a pas été initialisé au bon endroit", 0x200, chip8.getPC());
+	}
 
 	@Test
 	public void test00E0() {
