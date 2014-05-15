@@ -149,7 +149,6 @@ public class Chip8 {
 		switch (first) {
 		case 0x0000 :
 			if(x != 0x0000) {
-				//TODO Appel d'un programme une Addresse ?? abandonné par les interpreter modernes
 				System.out.println("Opcode non reconnu : " + String.format("%02X", opcode));
 			}
 			else {
@@ -290,7 +289,7 @@ public class Chip8 {
 			this.PC += 2;
 			break;
 		case 0x9000:
-			//TODO Skips
+			//Skips
 			if(this.V[x] == this.V[y]){
 				this.PC += 2;
 			}
@@ -299,7 +298,7 @@ public class Chip8 {
 			}
 			break;
 		case 0xA000:
-			//TODO
+			//Set I
 			this.I = (short) nnn;
 			this.PC += 2;
 			break;
@@ -332,7 +331,7 @@ public class Chip8 {
 			for(int axeY = 0; axeY < nbByte; axeY++){
 				int pixel = memory[I+axeY];
 				for(int axeX = 0 ; axeX<8 ; axeX++){
-					//On v�rifie que le pixel n'est pas hors de "l ecran"
+					//On vérifie que le pixel n'est pas hors de "l ecran"
 					if((pixel & (0x80>>axeX)) != 0 ){
 						if((xPlace & axeX)>63){
 							continue;
@@ -384,7 +383,7 @@ public class Chip8 {
 				break;
 			case 0x0A:
 				//On récupère une valeur d'input et on la stocke dans Vx
-				//Petite boucle pour �viter une boucle infinie qui rend impossible la récuperation de l'input
+				//Petite boucle pour éviter une boucle infinie qui rend impossible la récuperation de l'input
 				do{
 					key = input.getInput();
 					try {
