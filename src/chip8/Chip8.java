@@ -297,21 +297,13 @@ public class Chip8 {
 			break;
 		case 0xB000:
 			/**
-<<<<<<< HEAD
 			 * BNNN : Instruction pour sauter à l'adresse NNN depuis le registre v0 
-=======
-			 * BNNN : Instruction pour sauter � l'adresse NNN depuis le registre v0 
->>>>>>> branch 'master' of https://Inox117@bitbucket.org/Inox117/chip-8.git
 			 */
 			PC = nnn+V[0];
 			break;
 		case 0xC000:
 			/**
-<<<<<<< HEAD
 			 * CXKK Generer un byte aléatoire pour le registre Vx et y ajouter KK
-=======
-			 * CXKK Generer un byte al�atoire pour le registre Vx et y ajouter KK
->>>>>>> branch 'master' of https://Inox117@bitbucket.org/Inox117/chip-8.git
 			 */
 			V[x] = (byte)(random.nextInt(255)&kk);
 			PC += 2;

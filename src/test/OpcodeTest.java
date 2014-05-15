@@ -189,38 +189,6 @@ public class OpcodeTest {
 		assertEquals("Vx non modifié", (0x0004 + VxTemoin), this.chip8.getV()[3]);
 	}
 	
-	@Test
-	public void testBNNN(){
-		byte[] VTemoin = new byte[16];	
-		int nnn = (0xB304 & 0x0FFF);
-		pcTemoin = chip8.getPC();
-		chip8.setV(VTemoin);
-		chip8.opcode(0xB304);
-		assertEquals("PC mal incrémenté", VTemoin[0]+nnn, this.chip8.getPC());
-	}
-	
-	@Test
-	public void testCNNN(){
-		pcTemoin = chip8.getPC();
-		chip8.opcode(0xC777);
-		assertEquals("PC mal incrémenté",pcTemoin+2,this.chip8.getPC());
-	}
-	
-	@Test
-	public void testDNNN(){
-		
-	}
-	
-	@Test
-	public void testENNN(){
-		byte[] VTemoins = new byte[16];
-		byte VxTemoin = (byte) 0xF79E;
-		VTemoins[7] = VxTemoin;
-		pcTemoin = chip8.getPC();
-		chip8.setV(VTemoins);
-		chip8.opcode(0xF79E);
-		assertEquals("PC non incrémenté", pcTemoin+2, this.chip8.getPC());
-	}
 
 	@Test
 	public void testLimitationNbreOperations(){
@@ -357,4 +325,38 @@ public class OpcodeTest {
 
 		assertEquals(0x0666, chip8.getI());
 	}
+	
+	@Test
+	public void testBNNN(){
+		byte[] VTemoin = new byte[16];	
+		int nnn = (0xB304 & 0x0FFF);
+		pcTemoin = chip8.getPC();
+		chip8.setV(VTemoin);
+		chip8.opcode(0xB304);
+		assertEquals("PC mal incrémenté", VTemoin[0]+nnn, this.chip8.getPC());
+	}
+	
+	@Test
+	public void testCNNN(){
+		pcTemoin = chip8.getPC();
+		chip8.opcode(0xC777);
+		assertEquals("PC mal incrémenté",pcTemoin+2,this.chip8.getPC());
+	}
+	
+	@Test
+	public void testDNNN(){
+		
+	}
+	
+	@Test
+	public void testENNN(){
+		byte[] VTemoins = new byte[16];
+		byte VxTemoin = (byte) 0xF79E;
+		VTemoins[7] = VxTemoin;
+		pcTemoin = chip8.getPC();
+		chip8.setV(VTemoins);
+		chip8.opcode(0xF79E);
+		assertEquals("PC non incrémenté", pcTemoin+2, this.chip8.getPC());
+	}
+
 }
