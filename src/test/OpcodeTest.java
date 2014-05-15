@@ -206,10 +206,11 @@ public class OpcodeTest {
 	public void test8XY0(){
 		byte x = chip8.getV()[4];
 		byte y = chip8.getV()[2];
-
+		pcTemoin = chip8.getPC();
 		chip8.opcode(0x8420);
 
 		assertEquals(y, chip8.getV()[4]);
+		assertEquals("PC non incrémenté", pcTemoin + 2, chip8.getPC());
 	}
 
 	@Test
@@ -217,10 +218,11 @@ public class OpcodeTest {
 		byte x = chip8.getV()[4];
 		byte y = chip8.getV()[2];
 		byte res = (byte) (x | y);
-
+		pcTemoin = chip8.getPC();
 		chip8.opcode(0x8421);
 
 		assertEquals(res, chip8.getV()[4]);
+		assertEquals("PC non incrémenté", pcTemoin + 2, chip8.getPC());
 	}
 
 	@Test
@@ -228,10 +230,11 @@ public class OpcodeTest {
 		byte x = chip8.getV()[4];
 		byte y = chip8.getV()[2];
 		byte res = (byte) (x & y);
-
+		pcTemoin = chip8.getPC();
 		chip8.opcode(0x8422);
 
 		assertEquals(res, chip8.getV()[4]);
+		assertEquals("PC non incrémenté", pcTemoin + 2, chip8.getPC());
 	}
 
 	@Test
@@ -239,10 +242,12 @@ public class OpcodeTest {
 		byte x = chip8.getV()[4];
 		byte y = chip8.getV()[2];
 		byte res = (byte) (x ^ y);
+		pcTemoin = chip8.getPC();
 
 		chip8.opcode(0x8423);
 
 		assertEquals(res, chip8.getV()[4]);
+		assertEquals("PC non incrémenté", pcTemoin + 2, chip8.getPC());
 	}
 
 	@Test
@@ -250,10 +255,11 @@ public class OpcodeTest {
 		byte x = chip8.getV()[4];
 		byte y = chip8.getV()[2];
 		byte res = (byte) (x + y);
-
+		pcTemoin = chip8.getPC();
 		chip8.opcode(0x8424);
 
 		assertEquals(res, chip8.getV()[4]);
+		assertEquals("PC non incrémenté", pcTemoin + 2, chip8.getPC());
 	}
 
 	@Test
@@ -261,10 +267,11 @@ public class OpcodeTest {
 		byte x = chip8.getV()[4];
 		byte y = chip8.getV()[2];
 		byte res = (byte) (x - y);
-
+		pcTemoin = chip8.getPC();
 		chip8.opcode(0x8425);
 
 		assertEquals(res, chip8.getV()[4]);
+		assertEquals("PC non incrémenté", pcTemoin + 2, chip8.getPC());
 	}
 
 	@Test
@@ -272,10 +279,11 @@ public class OpcodeTest {
 		byte x = chip8.getV()[4];
 		byte y = chip8.getV()[2];
 		byte res = (byte) (x / 2);
-
+		pcTemoin = chip8.getPC();
 		chip8.opcode(0x8426);
 
 		assertEquals(res, chip8.getV()[4]);
+		assertEquals("PC non incrémenté", pcTemoin + 2, chip8.getPC());
 	}
 
 	@Test
@@ -283,10 +291,11 @@ public class OpcodeTest {
 		byte x = chip8.getV()[4];
 		byte y = chip8.getV()[2];
 		byte res = (byte) (y - x);
-
+		pcTemoin = chip8.getPC();
 		chip8.opcode(0x8427);
 
 		assertEquals(res, chip8.getV()[4]);
+		assertEquals("PC non incrémenté", pcTemoin + 2, chip8.getPC());
 	}
 
 	@Test
@@ -294,10 +303,11 @@ public class OpcodeTest {
 		byte x = chip8.getV()[4];
 		byte y = chip8.getV()[2];
 		byte res = (byte) (x*2);
-
+		pcTemoin = chip8.getPC();
 		chip8.opcode(0x8425);
 
 		assertEquals(res, chip8.getV()[4]);
+		assertEquals("PC non incrémenté", pcTemoin + 2, chip8.getPC());
 	}
 
 	@Test
@@ -309,19 +319,20 @@ public class OpcodeTest {
 		chip8.opcode(0x9420);
 
 		if(x != y){
-			assertEquals(pc + 2, chip8.getPC());
+			assertEquals(pc + 4, chip8.getPC());
 		}
 		else{
-			assertEquals(pc, chip8.getPC());
+			assertEquals(pc + 2, chip8.getPC());
 		}
 	}
 
 	@Test
 	public void testANNN(){
-
+		pcTemoin = chip8.getPC();
 		chip8.opcode(0xA666);
 
 		assertEquals(0x0666, chip8.getI());
+		assertEquals("PC non incrémenté", pcTemoin + 2, chip8.getPC());
 	}
 	
 	@Test
