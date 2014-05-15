@@ -52,7 +52,11 @@ public class Chip8 {
 		PC = 0x200;		
 	}
 
-	private byte[][] initDisplay() {
+	/**
+	 * Initialise l'écran
+	 * @return display, l'écran initialisé
+	 */
+	public byte[][] initDisplay() {
 		byte[][] screen = new byte[64][32];
 		for(int i=0;i<64;i++){
 			for(int j=0;j<32;j++){
@@ -62,6 +66,10 @@ public class Chip8 {
 		return screen;
 	}
 
+	/**
+	 * Interprète le code d'opération reçu
+	 * @param opcode, int
+	 */
 	public void opcode(int opcode){
 		
 		int x = ((opcode & 0x0F00) >> 8);
@@ -93,19 +101,19 @@ public class Chip8 {
 			break;
 
 		case 0x1000:
-			// saut à une addresse
+			// Jump to adress
 			PC = (opcode & 0x0FFF);			
 			break;
 			
 		case 0x2000:
-			//Appel d'une sous routine
+			// Call a subroutine
 			SP+=2;
 			stack[SP] = PC;
 			PC = (short)(opcode & 0x0FFF);
 			break;
 			
 		case 0x3000:
-			//Skip si egale
+			//Skip if equal
 			if(V[x] == (byte)kk) {
 				PC += 4;
 			}
@@ -115,7 +123,7 @@ public class Chip8 {
 			break;
 			
 		case 0x4000:
-			//Skip si pas egale
+			//Skip if not equal
 			if(V[x] != (byte)kk) {
 				PC += 4;
 			}
@@ -126,7 +134,7 @@ public class Chip8 {
 			
 		case 0x5000:
 			if((opcode & 0x000F) == 0x0000) {
-				//Skip si Vx = Vy
+				//Skip if Vx = Vy
 				if(V[x] == V[y]) {
 					PC += 4;
 				}
@@ -140,7 +148,7 @@ public class Chip8 {
 			break;
 			
 		case 0x6000:
-			//Set de Vx
+			//Set of Vx
 			V[x] = (byte) kk;
 			PC += 2;
 			break;
