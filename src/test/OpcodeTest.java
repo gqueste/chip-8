@@ -309,10 +309,10 @@ public class OpcodeTest {
 		chip8.opcode(0x9420);
 
 		if(x != y){
-			assertEquals(pc + 2, chip8.getPC());
+			assertEquals(pc + 4, chip8.getPC());
 		}
 		else{
-			assertEquals(pc, chip8.getPC());
+			assertEquals(pc + 2, chip8.getPC());
 		}
 	}
 
