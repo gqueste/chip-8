@@ -192,11 +192,14 @@ public class OpcodeTest {
 	@Test
 	public void testLimitationNbreOperations(){
 		for (int i = 0; i < 100; i++) {
-			if(chip8.limitationNbreOperations()) {
-				System.out.println("Limit true");
+			if(i == 0) {
+				assertEquals("Alors que première instruction, limitationON", false, chip8.limitationNbreOperations());
+			}
+			else if(i == 99) {
+				assertEquals("Alors que dernière instruction, limitationOFF", true, chip8.limitationNbreOperations());
 			}
 			else {
-				System.out.println("Limit false");
+					chip8.limitationNbreOperations();
 			}
 		}
 	}

@@ -3,6 +3,8 @@ package chip8;
 import java.util.Random;
 
 public class Chip8 {
+	
+	//private final int LIMIT_NUMBER-INSTRUCTION;
 
 	private int PC, delay_timer, sound_timer, instruction_count;
 	private byte SP,key;
@@ -106,6 +108,27 @@ public class Chip8 {
 			allowance -= 1.0;
 			return false;
 		}
+	}
+	
+	/**
+	 * Controle l'exécution de l'interpreter
+	 * Limite le nombre d'exécutions lues
+	 * Récupère le code depuis la mémoire
+	 * Met à jour les delay et sound timers
+	 */
+	public void lire() {
+		if(limitationNbreOperations()) {
+			return;
+		}
+		
+		if(instruction_count == 5){
+			instruction_count = 0;
+		}
+		
+		
+		//short opCodeLu = ;
+		
+		
 	}
 
 	/**
