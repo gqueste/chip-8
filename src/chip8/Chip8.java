@@ -20,6 +20,10 @@ public class Chip8 {
 		display = initDisplay();
 	}
 
+	/**
+	 * Initialiser l'écran
+	 * @return
+	 */
 	private byte[][] initDisplay() {
 		byte[][] screen = new byte[64][32];
 		for(int i=0;i<64;i++){
@@ -30,6 +34,10 @@ public class Chip8 {
 		return screen;
 	}
 
+	/**
+	 * Lecture des instructions
+	 * @param opcode
+	 */
 	public void opcode(int opcode){
 		
 		int x = ((opcode & 0x0F00) >> 8);
@@ -38,6 +46,7 @@ public class Chip8 {
 		int nnn = (opcode & 0x0FFF);
 		
 		int first = opcode & 0xF000;
+		int last = opcode & 0x000F;
 		
 		
 		switch (first) {
@@ -104,6 +113,66 @@ public class Chip8 {
 			break;
 		case 0x8000:
 			//TODO setter
+			byte vx = this.V[x];
+			byte vy = this.V[y];
+			if(last == 0x0000){
+				this.V[x] = vy;
+			}
+			else if(last == 0x0001){
+				this.V[x] = (byte) (vx | vy);
+			}
+			else if(last == 0x0002){
+				this.V[x] = (byte) (vx & vy);
+			}
+			else if(last == 0x0003){
+				this.V[x] = (byte) (vx ^ vy);
+			}
+			else if(last == 0x0004){
+				byte res = (byte) (vx + vy);
+				if(res > 255){
+					this.V[15] = 1;
+				}
+				else{
+					this.V[15] = 0;
+				}
+			}
+			else if(last == 0x0005){
+				if(vx > vy){
+					this.V[15] = 1;
+				}
+				else{
+					this.V[15] = 0;
+				}
+				this.V[x] = (byte) (vx - vy);
+			}
+			else if(last == 0x0006){
+				byte lastOfVX = (byte) (this.V[x] & 0x000F);
+				if(lastOfVX == 1){
+					this.V[15] = 1;
+				}
+				else{
+					this.V[15] = 0;
+				}
+			}
+			else if(last == 0x0007){
+				if(vy > vx){
+					this.V[15] = 1;
+				}
+				else{
+					this.V[15] = 0;
+				}
+				this.V[x] = (byte) (vy - vx);
+			}
+			else if(last == 0x000E){
+				if(vx > 7){
+					this.V[15] = 1;
+				}
+				else{
+					this.V[15] = 0;
+				}
+				this.V[x] *= 2;
+			}
+			this.PC += 2;
 			break;
 		case 0x9000:
 			//TODO Skips

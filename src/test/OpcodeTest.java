@@ -120,105 +120,126 @@ public class OpcodeTest {
 		assertEquals("PC mal incrémenté", pcTemoin + 2, this.chip8.getPC());
 	}
 	
-//	@Test
-//	public void test8XY0(){
-//		int x = chip8.getV()[X];
-//		int y = chip8.getV()[Y];
-//		
-//		chip8.opcode(0x8XY0);
-//		
-//		assertEquals(y, chip8.getV()[X]);
-//	}
-//	
-//	@Test
-//	public void test8XY1(){
-//		int x = chip8.getV()[X];
-//		int y = chip8.getV()[Y];
-//		int res = x || y;
-//		
-//		chip8.opcode(0x8XY1);
-//		
-//		assertEquals(y, chip8.getV()[X]);
-//	}
-//	
-//	@Test
-//	public void test8XY2(){
-//		int x = chip8.getV()[X];
-//		int y = chip8.getV()[Y];
-//		
-//		chip8.opcode(0x8XY2);
-//		
-//		assertEquals(y, chip8.getV()[X]);
-//	}
-//	
-//	@Test
-//	public void test8XY3(){
-//		int x = chip8.getV()[X];
-//		int y = chip8.getV()[Y];
-//		
-//		chip8.opcode(0x8XY3);
-//		
-//		assertEquals(y, chip8.getV()[X]);
-//	}
-//	
-//	@Test
-//	public void test8XY4(){
-//		int x = chip8.getV()[X];
-//		int y = chip8.getV()[Y];
-//		
-//		chip8.opcode(0x8XY4);
-//		
-//		assertEquals(y, chip8.getV()[X]);
-//	}
-//	
-//	@Test
-//	public void test8XY5(){
-//		int x = chip8.getV()[X];
-//		int y = chip8.getV()[Y];
-//		
-//		chip8.opcode(0x8XY0);
-//		
-//		assertEquals(y, chip8.getV()[X]);
-//	}
-//	
-//	@Test
-//	public void test8XY6(){
-//		int x = chip8.getV()[X];
-//		int y = chip8.getV()[Y];
-//		
-//		chip8.opcode(0x8XY0);
-//		
-//		assertEquals(y, chip8.getV()[X]);
-//	}
-//	
-//	@Test
-//	public void test8XY7(){
-//		int x = chip8.getV()[X];
-//		int y = chip8.getV()[Y];
-//		
-//		chip8.opcode(0x8XY0);
-//		
-//		assertEquals(y, chip8.getV()[X]);
-//	}
-//	
-//	@Test
-//	public void test8XYE(){
-//		int x = chip8.getV()[X];
-//		int y = chip8.getV()[Y];
-//		
-//		chip8.opcode(0x8XY0);
-//		
-//		assertEquals(y, chip8.getV()[X]);
-//	}
-//	
-//	@Test
-//	public void test9XY0(){
-//		
-//	}
-//	
-//	@Test
-//	public void testANNN(){
-//		
-//	}
+	@Test
+	public void test8XY0(){
+		byte x = chip8.getV()[4];
+		byte y = chip8.getV()[2];
+		
+		chip8.opcode(0x8420);
+		
+		assertEquals(y, chip8.getV()[4]);
+	}
+	
+	@Test
+	public void test8XY1(){
+		byte x = chip8.getV()[4];
+		byte y = chip8.getV()[2];
+		byte res = (byte) (x | y);
+		
+		chip8.opcode(0x8421);
+		
+		assertEquals(res, chip8.getV()[4]);
+	}
+	
+	@Test
+	public void test8XY2(){
+		byte x = chip8.getV()[4];
+		byte y = chip8.getV()[2];
+		byte res = (byte) (x & y);
+		
+		chip8.opcode(0x8422);
+		
+		assertEquals(res, chip8.getV()[4]);
+	}
+	
+	@Test
+	public void test8XY3(){
+		byte x = chip8.getV()[4];
+		byte y = chip8.getV()[2];
+		byte res = (byte) (x ^ y);
+		
+		chip8.opcode(0x8423);
+		
+		assertEquals(res, chip8.getV()[4]);
+	}
+	
+	@Test
+	public void test8XY4(){
+		byte x = chip8.getV()[4];
+		byte y = chip8.getV()[2];
+		byte res = (byte) (x + y);
+		
+		chip8.opcode(0x8424);
+		
+		assertEquals(res, chip8.getV()[4]);
+	}
+	
+	@Test
+	public void test8XY5(){
+		byte x = chip8.getV()[4];
+		byte y = chip8.getV()[2];
+		byte res = (byte) (x - y);
+		
+		chip8.opcode(0x8425);
+		
+		assertEquals(res, chip8.getV()[4]);
+	}
+	
+	@Test
+	public void test8XY6(){
+		byte x = chip8.getV()[4];
+		byte y = chip8.getV()[2];
+		byte res = (byte) (x / 2);
+		
+		chip8.opcode(0x8426);
+		
+		assertEquals(res, chip8.getV()[4]);
+	}
+	
+	@Test
+	public void test8XY7(){
+		byte x = chip8.getV()[4];
+		byte y = chip8.getV()[2];
+		byte res = (byte) (y - x);
+		
+		chip8.opcode(0x8427);
+		
+		assertEquals(res, chip8.getV()[4]);
+	}
+	
+	@Test
+	public void test8XYE(){
+		byte x = chip8.getV()[4];
+		byte y = chip8.getV()[2];
+		byte res = (byte) (x*2);
+		
+		chip8.opcode(0x8425);
+		
+		assertEquals(res, chip8.getV()[4]);
+	}
+	
+	@Test
+	public void test9XY0(){
+		byte x = chip8.getV()[4];
+		byte y = chip8.getV()[2];
+		int pc = chip8.getPC();
+		
+		chip8.opcode(0x9420);
+		
+		if(x != y){
+			assertEquals(pc + 2, chip8.getPC());
+		}
+		else{
+			assertEquals(pc, chip8.getPC());
+		}
+	}
+	
+	@Test
+	public void testANNN(){
+		
+		chip8.opcode(0xA666);
+		
+		assertEquals(0x0666, chip8.getI());
+	}
 
 }
