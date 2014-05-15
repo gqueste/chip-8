@@ -49,13 +49,13 @@ public class Chip8 {
 				if(opcode == 0x00E0) {
 					//clear the screen
 					this.display = initDisplay();
-					this.PC ++;
+					this.PC += 2;
 				}
 				else if (opcode == 0x00EE){
 					//returns from a subroutine
 					this.PC = this.stack[this.SP];
 					this.SP --;
-					this.PC ++;
+					this.PC += 2;
 				}
 			}
 			break;
@@ -67,7 +67,7 @@ public class Chip8 {
 			
 		case 0x2000:
 			//Appel d'une sous routine
-			SP++;
+			SP+=2;
 			stack[SP] = PC;
 			PC = (short)(opcode & 0x0FFF);
 			break;
@@ -75,20 +75,20 @@ public class Chip8 {
 		case 0x3000:
 			//Skip si egale
 			if(V[x] == (byte)kk) {
-				PC += 2;
+				PC += 4;
 			}
 			else {
-				PC ++;
+				PC +=2;
 			}
 			break;
 			
 		case 0x4000:
 			//Skip si pas egale
 			if(V[x] != (byte)kk) {
-				PC += 2;
+				PC += 4;
 			}
 			else {
-				PC ++;
+				PC +=2;
 			}
 			break;
 			
@@ -96,18 +96,21 @@ public class Chip8 {
 			if((opcode & 0x000F) == 0x0000) {
 				//Skip si Vx = Vy
 				if(V[x] == V[y]) {
-					PC += 2;
+					PC += 4;
 				}
 				else {
-					PC ++;
+					PC += 2;
 				}
+			}
+			else {
+				System.out.println("Opcode non reconnu ");
 			}
 			break;
 			
 		case 0x6000:
 			//Set de Vx
 			V[x] = (byte) kk;
-			PC ++;
+			PC += 2;
 			break;
 			
 		case 0x7000:
