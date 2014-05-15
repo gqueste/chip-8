@@ -347,14 +347,65 @@ public class OpcodeTest {
 	}
 	
 	@Test
-	public void testENNN(){
+	public void testEX9E(){
 		byte[] VTemoins = new byte[16];
-		byte VxTemoin = (byte) 0xF79E;
+		byte VxTemoin = (byte) 0xE79E;
 		VTemoins[7] = VxTemoin;
 		pcTemoin = chip8.getPC();
 		chip8.setV(VTemoins);
 		chip8.opcode(0xF79E);
 		assertEquals("PC non incrémenté", pcTemoin+2, this.chip8.getPC());
+	}
+	
+	@Test
+	public void testEXA1(){
+		
+	}
+	
+	@Test
+	public void testFX07(){
+		
+	}
+	
+	@Test
+	public void testFX0A(){
+		
+	}
+	
+	@Test
+	public void testFX15(){
+		
+	}
+	
+	@Test
+	public void testFX18(){
+		
+	}
+	
+	@Test
+	public void testFX1E(){
+		
+	}
+	
+	@Test
+	public void testFX29(){
+		
+	}
+	
+	@Test
+	public void testFX33(){
+		
+	}
+	
+	@Test
+	public void testFX55(){
+		
+	}
+	
+	@Test
+	public void testFX65(){
+		byte[] VTemoins = new byte[16];
+		
 	}
 
 }
