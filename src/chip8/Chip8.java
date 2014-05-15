@@ -4,7 +4,7 @@ import java.util.Random;
 
 public class Chip8 {
 
-	private int PC, delay_timer, sound_timer, instruction_count;;
+	private int PC, delay_timer, sound_timer, instruction_count;
 	private byte SP,key;
 	private short I;
 	private byte[] V, memory;
@@ -335,6 +335,54 @@ public class Chip8 {
 
 	public void setMemory(byte[] memory) {
 		this.memory = memory;
+	}
+
+	public int getDelay_timer() {
+		return delay_timer;
+	}
+
+	public void setDelay_timer(int delay_timer) {
+		this.delay_timer = delay_timer;
+	}
+
+	public int getSound_timer() {
+		return sound_timer;
+	}
+
+	public void setSound_timer(int sound_timer) {
+		this.sound_timer = sound_timer;
+	}
+
+	public int getInstruction_count() {
+		return instruction_count;
+	}
+
+	public void setInstruction_count(int instruction_count) {
+		this.instruction_count = instruction_count;
+	}
+
+	public byte getKey() {
+		return key;
+	}
+
+	public void setKey(byte key) {
+		this.key = key;
+	}
+
+	public Random getRandom() {
+		return random;
+	}
+
+	public void setRandom(Random random) {
+		this.random = random;
+	}
+
+	public Touche getInput() {
+		return input;
+	}
+
+	public void setInput(Touche input) {
+		this.input = input;
 	}
 
 }
