@@ -84,6 +84,7 @@ public class Chip8 {
 		case 0x0000 :
 			if(x != 0x0000) {
 				//TODO Appel d'un programme une Addresse ?? abandonné par les interpreter modernes
+				System.out.println("Opcode non reconnu : " + String.format("%02X", opcode));
 			}
 			else {
 				if(opcode == 0x00E0) {
@@ -143,7 +144,7 @@ public class Chip8 {
 				}
 			}
 			else {
-				System.out.println("Opcode non reconnu ");
+				System.out.println("Opcode non reconnu : " + String.format("%02X", opcode));
 			}
 			break;
 			
