@@ -291,19 +291,27 @@ public class Chip8 {
 			break;
 		case 0x9000:
 			//TODO Skips
+			if(this.V[x] == this.V[y]){
+				this.PC += 2;
+			}
+			else{
+				this.PC += 4;
+			}
 			break;
 		case 0xA000:
 			//TODO
+			this.I = (short) nnn;
+			this.PC += 2;
 			break;
 		case 0xB000:
 			/**
-			 * BNNN : Instruction pour sauter � l'adresse NNN depuis le registre v0 
+			 * BNNN : Instruction pour sauter à l'adresse NNN depuis le registre v0 
 			 */
 			PC = nnn+V[0];
 			break;
 		case 0xC000:
 			/**
-			 * CXKK Generer un byte al�atoire pour le registre Vx et y ajouter KK
+			 * CXKK Generer un byte aléatoire pour le registre Vx et y ajouter KK
 			 */
 			V[x] = (byte)(random.nextInt(255)&kk);
 			PC += 2;
@@ -343,11 +351,11 @@ public class Chip8 {
 			break;
 		case 0xE000:
 			/**
-			 * Instruction commen�ant par un E
+			 * Instruction commençant par un E
 			 */
-			// on r�cup�re le reste de l'instruction
+			// on récupère le reste de l'instruction
 			if(kk == 0x9E){
-				//On skip si la bonne touche est press�e
+				//On skip si la bonne touche est pressée
 				key = input.getInput();
 				if(V[x]==key){
 					PC+=4;
@@ -371,12 +379,12 @@ public class Chip8 {
 			kk = (short)(opcode & 0x00FF);
 			switch(kk){
 			case 0x07:
-				//On set la valeur du Vx � celle du delay_timer
+				//On set la valeur du Vx à celle du delay_timer
 				V[x] = (byte)delay_timer;
 				break;
 			case 0x0A:
-				//On r�cup�re une valeur d'input et on la stocke dans Vx
-				//Petite boucle pour �viter une boucle infinie qui rend impossible la r�cup�ration de l'input
+				//On récupère une valeur d'input et on la stocke dans Vx
+				//Petite boucle pour �viter une boucle infinie qui rend impossible la récuperation de l'input
 				do{
 					key = input.getInput();
 					try {
@@ -389,11 +397,53 @@ public class Chip8 {
 				V[x] = key;
 				break;
 			case 0x15:
-				// On set le delay_timer � Vx
+				// On set le delay_timer à Vx
+				delay_timer = (V[x] & 0xFF);
+				break;
+			case 0x18:
+				// on set le sound_timer à Vx
+				sound_timer = (V[x] & 0xFF);
+				break;
+			case 0x1E:
+				//on set I à I+Vx
+				I = (short)(I+V[x]);
+				break;
+			case 0x29:
+				//On set de I avec la position du sprite de l'octet Vx
+				I = (short)(V[x]*5);
+				break;
+			case 0x33:
+//				On stock la représentation BCD du registre vr dans I,I+1,I+2
+				char chaine[] = String.valueOf((int)(V[x] & 0xFF)).toCharArray();
+				char BCD[]={0,0,0};
+				for(int place=0,count=2;place<chaine.length;place++,count--){
+					BCD[count]=chaine[place];
+				}
+				for(int i=0;i<3;i++){
+					if(BCD[i] == 0)
+					{
+						memory[I + i] = 0;
+					}
+					else
+					{
+						memory[I + i] =	(byte)Character.getNumericValue(BCD[i]);
+					}
+				}
+				break;
+			case 0x55:
+				for(int i = 0; i <= x; i++)
+					memory[I + i] = V[i];
+				
+				break;
+			case 0x65:
+				for(int i = 0;i<=x;i++){
+					V[i] = memory[I + i];
+				}
 				break;
 			default:
 				break;
 			}
+			PC +=2;
 			break;
 		default:
 			break;
