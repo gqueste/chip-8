@@ -3,8 +3,6 @@ package test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
-import javax.naming.LimitExceededException;
-
 import org.junit.Before;
 import org.junit.Test;
 
