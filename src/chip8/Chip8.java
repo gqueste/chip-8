@@ -43,26 +43,25 @@ public class Chip8 {
 		switch (first) {
 		case 0x0000 :
 			if(x != 0x0000) {
-				//TODO Appel d'un programme une Addresse ??
-				System.out.println("Instruction non reconnue");
+				//TODO Appel d'un programme une Addresse ?? abandonné par les interpreter modernes
 			}
 			else {
 				if(opcode == 0x00E0) {
 					//clear the screen
 					this.display = initDisplay();
-					this.PC += 2;
+					this.PC ++;
 				}
 				else if (opcode == 0x00EE){
 					//returns from a subroutine
 					this.PC = this.stack[this.SP];
 					this.SP --;
-					this.PC += 2;
+					this.PC ++;
 				}
 			}
 			break;
 
 		case 0x1000:
-			// saut �une addresse
+			// saut à une addresse
 			PC = (opcode & 0x0FFF);			
 			break;
 			
@@ -76,26 +75,35 @@ public class Chip8 {
 		case 0x3000:
 			//Skip si egale
 			if(V[x] == (byte)kk) {
-				PC += 4;
+				PC += 2;
 			}
 			else {
-				PC += 2;
+				PC ++;
 			}
 			break;
 			
 		case 0x4000:
 			//Skip si pas egale
 			if(V[x] != (byte)kk) {
-				PC += 4;
+				PC += 2;
 			}
 			else {
-				PC += 2;
+				PC ++;
 			}
 			break;
 			
 		case 0x5000:
-			//TODO Skip si egale
+			if((opcode & 0x000F) == 0x0000) {
+				//Skip si Vx = Vy
+				if(V[x] == V[y]) {
+					PC += 2;
+				}
+				else {
+					PC ++;
+				}
+			}
 			break;
+			
 		case 0x6000:
 			//TODO Set de x
 			break;
