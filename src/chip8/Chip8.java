@@ -230,9 +230,17 @@ public class Chip8 {
 			break;
 		case 0x9000:
 			//TODO Skips
+			if(this.V[x] == this.V[y]){
+				this.PC += 2;
+			}
+			else{
+				this.PC += 4;
+			}
 			break;
 		case 0xA000:
 			//TODO
+			this.I = (short) nnn;
+			this.PC += 2;
 			break;
 		case 0xB000:
 			/**
