@@ -3,6 +3,8 @@ package test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
+import javax.naming.LimitExceededException;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -185,5 +187,17 @@ public class OpcodeTest {
 		chip8.opcode(0x7304);
 		assertEquals("PC non incrémenté", pcTemoin+2, this.chip8.getPC());
 		assertEquals("Vx non modifié", (0x0004 + 0x0001), this.chip8.getV()[3]);
+	}
+	
+	@Test
+	public void testLimitationNbreOperations(){
+		for (int i = 0; i < 100; i++) {
+			if(chip8.limitationNbreOperations()) {
+				System.out.println("Limit true");
+			}
+			else {
+				System.out.println("Limit false");
+			}
+		}
 	}
 }
