@@ -25,12 +25,18 @@ public class OpcodeTest {
 			}
 		}
 	}
+	
+	@Test
+	public void testloadMemory() {
+		this.chip8.loadMemory();
+		assertEquals("PC n'a pas √©t√© initialis√© au bon endroit", 0x200, chip8.getPC());
+	}
 
 	@Test
 	public void test00E0() {
 		chip8.opcode(0x00E0);
-		assertEquals("L'Ècran doit etre nettoyÈ",this.displayTemoin, chip8.getDisplay());
-		assertEquals("PC n' a pas ÈtÈ incrÈmentÈ", pcTemoin+2, chip8.getPC());
+		assertEquals("L'√©cran n'a pas √©t√© nettoy√©",this.displayTemoin, chip8.getDisplay());
+		assertEquals("PC n' a pas √©t√© incr√©ment√©", pcTemoin+2, chip8.getPC());
 	}
 	
 	@Test
@@ -42,8 +48,8 @@ public class OpcodeTest {
 		chip8.setStack(stackTemoin);
 		
 		chip8.opcode(0x00EE);
-		assertEquals("SP non dÈcrÈmentÈ", 0, chip8.getSP());
-		assertEquals("PC prÈcÈdent non rÈcupÈrÈ", stackTemoin[1] + 2, chip8.getPC());
+		assertEquals("SP non d√©cr√©ment√©", 0, chip8.getSP());
+		assertEquals("PC pr√©c√©dent non r√©cup√©r√©", stackTemoin[1] +2, chip8.getPC());
 	}
 	
 	@Test
@@ -51,16 +57,16 @@ public class OpcodeTest {
 		byte SPTemoin = chip8.getSP();
 		pcTemoin = chip8.getPC();
 		chip8.opcode(0x0AAA);
-		assertEquals("PC a ÈtÈ modifiÈ", pcTemoin, chip8.getPC());
-		assertEquals("SP a ÈtÈ modifiÈ", SPTemoin, chip8.getSP());
+		assertEquals("PC a √©t√© modifi√©", pcTemoin, chip8.getPC());
+		assertEquals("SP a √©t√© modifi√©", SPTemoin, chip8.getSP());
 	}
 	
 	@Test
 	public void test1NNN() {
 		pcTemoin = chip8.getPC();
 		chip8.opcode(0x1333);
-		assertNotEquals("PC n'a pas ÈtÈ modifiÈ", pcTemoin, chip8.getPC());
-		assertEquals("PC mal modifiÈ", (0x1333 & 0x0FFF), chip8.getPC());
+		assertNotEquals("PC n'a pas √©t√© modifi√©", pcTemoin, chip8.getPC());
+		assertEquals("PC mal modifi√©", (0x1333 & 0x0FFF), chip8.getPC());
 	}
 	
 	@Test
@@ -68,18 +74,18 @@ public class OpcodeTest {
 		pcTemoin = chip8.getPC();
 		byte SPTemoins = chip8.getSP();
 		chip8.opcode(0x2333);
-		assertNotEquals("PC n'a pas ÈtÈ modifiÈ", pcTemoin, chip8.getPC());
+		assertNotEquals("PC n'a pas √©t√© modifi√©", pcTemoin, chip8.getPC());
 		
 		//Verification de la sauvegarde
 		int pcSauvegarde = chip8.getStack()[chip8.getSP()];
-		assertEquals("PC mal sauvegardÈ", pcSauvegarde, pcTemoin);
+		assertEquals("PC mal sauvegard√©", pcSauvegarde, pcTemoin);
 		
-		//IncrÈmentation du SP
-		SPTemoins ++;
-		assertEquals("SP non incrÈmentÈ", SPTemoins, chip8.getSP());
+		//Incr√©mentation du SP
+		SPTemoins += 2;
+		assertEquals("SP non incr√©ment√©", SPTemoins, chip8.getSP());
 		
 		//changement du PC
-		assertEquals("PC non modifiÈ", (0x2333 & 0x0FFF), chip8.getPC());
+		assertEquals("PC non modifi√©", (0x2333 & 0x0FFF), chip8.getPC());
 	}
 	
 	@Test
@@ -91,14 +97,14 @@ public class OpcodeTest {
 		VTemoin[4] = (byte) 0x0044;
 		chip8.setV(VTemoin);
 		chip8.opcode(0x3444);
-		assertEquals("PC non incrÈmentÈ 2 fois", pcTemoin + 4, this.chip8.getPC());
+		assertEquals("PC non incr√©ment√© 2 fois", pcTemoin + 4, this.chip8.getPC());
 		
 		//test non valide
 		pcTemoin = chip8.getPC();
 		VTemoin[4] = (byte) 0x0045;
 		chip8.setV(VTemoin);
 		chip8.opcode(0x3444);
-		assertNotEquals("PC incrÈmentÈ 2 fois", pcTemoin + 4, this.chip8.getPC());
+		assertEquals("PC non incr√©ment√© 1 fois", pcTemoin +2, this.chip8.getPC());
 	}
 	
 	@Test
@@ -110,14 +116,75 @@ public class OpcodeTest {
 		VTemoin[4] = (byte) 0x0045;
 		chip8.setV(VTemoin);
 		chip8.opcode(0x4444);
-		assertEquals("PC non incrÈmentÈ 2 fois", pcTemoin + 4, this.chip8.getPC());
+		assertEquals("PC non incr√©ment√© 2 fois", pcTemoin + 4, this.chip8.getPC());
 		
 		//test Non valide
 		pcTemoin = chip8.getPC();
 		VTemoin[4] = (byte) 0x0044;
 		chip8.setV(VTemoin);
 		chip8.opcode(0x4444);
-		assertEquals("PC mal incrÈmentÈ", pcTemoin + 2, this.chip8.getPC());
+		assertEquals("PC non incr√©ment√© 1 fois", pcTemoin +2, this.chip8.getPC());
+	}
+	
+	@Test
+	public void test5NNN() {
+		byte[] VTemoin = new byte[16];	
+		
+		//Test valide
+		byte VxTemoin = (byte) 0x0001;
+		byte VyTemoin = (byte) 0x0001;
+		VTemoin[3] = VxTemoin;
+		pcTemoin = chip8.getPC();
+		VTemoin[4] = (byte) VyTemoin;
+		chip8.setV(VTemoin);
+		chip8.opcode(0x5340);
+		assertEquals("Vx pas correct", VxTemoin, chip8.getV()[3]);
+		assertEquals("Vy pas correct", VyTemoin, chip8.getV()[4]);
+		assertEquals("PC pas incr√©ment√© 2 fois", pcTemoin + 4, this.chip8.getPC());
+		
+		
+		//Test non valide : finit pas par 0
+		pcTemoin = chip8.getPC();
+		chip8.setV(VTemoin);
+		chip8.opcode(0x5334);
+		assertEquals("Instruction n'a pas √©t√© ignor√©e", pcTemoin, this.chip8.getPC());
+		
+		//Test non valide : pas egal
+		VxTemoin = (byte) 0x0001;
+		VyTemoin = (byte) 0x0002;
+		VTemoin[3] = VxTemoin;
+		pcTemoin = chip8.getPC();
+		VTemoin[4] = (byte) VyTemoin;
+		chip8.setV(VTemoin);
+		chip8.opcode(0x5340);
+		assertEquals("Vx pas correct", VxTemoin, chip8.getV()[3]);
+		assertEquals("Vy pas correct", VyTemoin, chip8.getV()[4]);
+		assertEquals("PC mal incr√©ment√©", pcTemoin + 2, this.chip8.getPC());
+				
+	}
+	
+	@Test
+	public void test6NNN() {
+		byte[] VTemoin = new byte[16];	
+		byte VxTemoin = (byte) 0x0001;
+		VTemoin[3] = VxTemoin;
+		pcTemoin = chip8.getPC();
+		chip8.setV(VTemoin);
+		chip8.opcode(0x6344);
+		assertEquals("PC non incr√©ment√©", pcTemoin+2, this.chip8.getPC());
+		assertEquals("Vx non modifi√©", 0x0044, this.chip8.getV()[3]);
+	}
+	
+	@Test
+	public void test7NNN() {
+		byte[] VTemoin = new byte[16];	
+		byte VxTemoin = (byte) 0x0001;
+		VTemoin[3] = VxTemoin;
+		pcTemoin = chip8.getPC();
+		chip8.setV(VTemoin);
+		chip8.opcode(0x7304);
+		assertEquals("PC non incr√©ment√©", pcTemoin+2, this.chip8.getPC());
+		assertEquals("Vx non modifi√©", (0x0004 + 0x0001), this.chip8.getV()[3]);
 	}
 	
 	@Test
@@ -241,5 +308,4 @@ public class OpcodeTest {
 		
 		assertEquals(0x0666, chip8.getI());
 	}
-
 }
