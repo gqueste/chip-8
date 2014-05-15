@@ -175,13 +175,13 @@ public class Chip8 {
 			break;
 		case 0xB000:
 			/**
-			 * BNNN : Instruction pour sauter à l'adresse NNN depuis le registre v0 
+			 * BNNN : Instruction pour sauter Ã  l'adresse NNN depuis le registre v0 
 			 */
 			PC = nnn+V[0];
 			break;
 		case 0xC000:
 			/**
-			 * CXKK Generer un byte aléatoire pour le registre Vx et y ajouter KK
+			 * CXKK Generer un byte alÃ©atoire pour le registre Vx et y ajouter KK
 			 */
 			V[x] = (byte)(random.nextInt(255)&kk);
 			PC += 2;
@@ -202,7 +202,7 @@ public class Chip8 {
 			for(int axeY = 0; axeY < nbByte; axeY++){
 				int pixel = memory[I+axeY];
 				for(int axeX = 0 ; axeX<8 ; axeX++){
-					//On vérifie que le pixel n'est pas hors de "l ecran"
+					//On vï¿½rifie que le pixel n'est pas hors de "l ecran"
 					if((pixel & (0x80>>axeX)) != 0 ){
 						if((xPlace & axeX)>63){
 							continue;
@@ -221,11 +221,11 @@ public class Chip8 {
 			break;
 		case 0xE000:
 			/**
-			 * Instruction commençant par un E
+			 * Instruction commenÃ§ant par un E
 			 */
-			// on récupère le reste de l'instruction
+			// on rÃ©cupÃ¨re le reste de l'instruction
 			if(kk == 0x9E){
-				//On skip si la bonne touche est pressée
+				//On skip si la bonne touche est pressÃ©e
 				key = input.getInput();
 				if(V[x]==key){
 					PC+=4;
@@ -233,7 +233,7 @@ public class Chip8 {
 					PC+=2;
 				}
 			}else if(kk == 0xA1){
-				//On skip si la bonne touche n est pas pressée
+				//On skip si la bonne touche n est pas pressï¿½e
 				key = input.getInput();
 				if(V[x]==key){
 					PC+=2;
@@ -249,12 +249,12 @@ public class Chip8 {
 			kk = (short)(opcode & 0x00FF);
 			switch(kk){
 			case 0x07:
-				//On set la valeur du Vx à celle du delay_timer
+				//On set la valeur du Vx Ã  celle du delay_timer
 				V[x] = (byte)delay_timer;
 				break;
 			case 0x0A:
-				//On récupère une valeur d'input et on la stocke dans Vx
-				//Petite boucle pour éviter une boucle infinie qui rend impossible la récupération de l'input
+				//On rÃ©cupÃ¨re une valeur d'input et on la stocke dans Vx
+				//Petite boucle pour ï¿½viter une boucle infinie qui rend impossible la rÃ©cuperation de l'input
 				do{
 					key = input.getInput();
 					try {
@@ -267,11 +267,53 @@ public class Chip8 {
 				V[x] = key;
 				break;
 			case 0x15:
-				// On set le delay_timer à Vx
+				// On set le delay_timer Ã  Vx
+				delay_timer = (V[x] & 0xFF);
+				break;
+			case 0x18:
+				// on set le sound_timer Ã  Vx
+				sound_timer = (V[x] & 0xFF);
+				break;
+			case 0x1E:
+				//on set I Ã  I+Vx
+				I = (short)(I+V[x]);
+				break;
+			case 0x29:
+				//On set de I avec la position du sprite de l'octet Vx
+				I = (short)(V[x]*5);
+				break;
+			case 0x33:
+//				On stock la reprÃ©sentation BCD du registre vr dans I,I+1,I+2
+				char chaine[] = String.valueOf((int)(V[x] & 0xFF)).toCharArray();
+				char BCD[]={0,0,0};
+				for(int place=0,count=2;place<chaine.length;place++,count--){
+					BCD[count]=chaine[place];
+				}
+				for(int i=0;i<3;i++){
+					if(BCD[i] == 0)
+					{
+						memory[I + i] = 0;
+					}
+					else
+					{
+						memory[I + i] =	(byte)Character.getNumericValue(BCD[i]);
+					}
+				}
+				break;
+			case 0x55:
+				for(int i = 0; i <= x; i++)
+					memory[I + i] = V[i];
+				
+				break;
+			case 0x65:
+				for(int i = 0;i<=x;i++){
+					V[i] = memory[I + i];
+				}
 				break;
 			default:
 				break;
 			}
+			PC +=2;
 			break;
 		default:
 			break;
