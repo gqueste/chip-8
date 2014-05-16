@@ -355,7 +355,11 @@ public class Chip8 {
 			// on récupère le reste de l'instruction
 			if(kk == 0x9E){
 				//On skip si la bonne touche est pressée
-				key = input.getInput();
+				//TODO
+				// créer la frame
+//				key = input.getInput();
+				//TEMP
+				key=0x07;
 				if(V[x]==key){
 					PC+=4;
 				}else{
@@ -363,7 +367,10 @@ public class Chip8 {
 				}
 			}else if(kk == 0xA1){
 				//On skip si la bonne touche n est pas press�e
-				key = input.getInput();
+				//TODO
+				//Créer la frame
+//				key = input.getInput();
+				key = 0x08;
 				if(V[x]==key){
 					PC+=2;
 				}else{
@@ -375,7 +382,6 @@ public class Chip8 {
 			/**
 			 * Toutes les instructions qui commence par F
 			 */
-			kk = (short)(opcode & 0x00FF);
 			switch(kk){
 			case 0x07:
 				//On set la valeur du Vx à celle du delay_timer
@@ -384,15 +390,16 @@ public class Chip8 {
 			case 0x0A:
 				//On récupère une valeur d'input et on la stocke dans Vx
 				//Petite boucle pour éviter une boucle infinie qui rend impossible la récuperation de l'input
-				do{
-					key = input.getInput();
-					try {
-						Thread.sleep(10);
-					} catch(InterruptedException ex) {
-						Thread.currentThread().interrupt();
-					}
-				} while(key == -1);
-
+//				TODO à décommenter quand la Frame sera crée
+//				do{
+//					key = input.getInput();
+//					try {
+//						Thread.sleep(10);
+//					} catch(InterruptedException ex) {
+//						Thread.currentThread().interrupt();
+//					}
+//				} while(key == -1);
+				key = 0x07;
 				V[x] = key;
 				break;
 			case 0x15:
