@@ -126,9 +126,30 @@ public class Chip8 {
 		}
 		
 		
-		//short opCodeLu = ;
+		int msb, lsb, total;
+
+		msb = (((int)memory[PC]) & 0xFF);
+		lsb = (((int)memory[PC + 1]) & 0xFF);
+		total = ((msb << 8) | lsb);
+		short opcodeRecupere = (short)total;
 		
+		opcode(opcodeRecupere);
 		
+		if(instruction_count == 0) {
+			if(delay_timer > 0){
+				delay_timer--;
+			}
+			if(sound_timer > 0) {
+				sound_timer--;
+				if(sound_timer > 0) {
+					//sound.setPlaying(true);
+				}
+				else {
+					//if(sound.isPlaying())
+					//	sound.setPlaying(false);
+				}
+			}
+		}	
 	}
 	
 	/**
