@@ -6,7 +6,7 @@ public class Chip8 {
 	
 	//private final int LIMIT_NUMBER-INSTRUCTION;
 
-	private int PC, delay_timer, sound_timer, instruction_count;
+	private int PC, delay_timer, sound_timer;
 	private byte SP,key;
 	private short I;
 	private byte[] V, memory;
@@ -119,12 +119,7 @@ public class Chip8 {
 	public void lire() {
 		if(limitationNbreOperations()) {
 			return;
-		}
-		
-		if(instruction_count == 5){
-			instruction_count = 0;
-		}
-		
+		}		
 		
 		int msb, lsb, total;
 
@@ -134,22 +129,16 @@ public class Chip8 {
 		short opcodeRecupere = (short)total;
 		
 		opcode(opcodeRecupere);
-		
-		if(instruction_count == 0) {
-			if(delay_timer > 0){
-				delay_timer--;
+
+		if(delay_timer > 0){
+			delay_timer--;
+		}
+		if(sound_timer > 0) {
+			if(sound_timer == 1) {
+				//TODO playSound
 			}
-			if(sound_timer > 0) {
-				sound_timer--;
-				if(sound_timer > 0) {
-					//sound.setPlaying(true);
-				}
-				else {
-					//if(sound.isPlaying())
-					//	sound.setPlaying(false);
-				}
-			}
-		}	
+			sound_timer--;
+		}
 	}
 	
 	/**
@@ -550,14 +539,6 @@ public class Chip8 {
 
 	public void setSound_timer(int sound_timer) {
 		this.sound_timer = sound_timer;
-	}
-
-	public int getInstruction_count() {
-		return instruction_count;
-	}
-
-	public void setInstruction_count(int instruction_count) {
-		this.instruction_count = instruction_count;
 	}
 
 	public byte getKey() {
