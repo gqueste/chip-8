@@ -1,5 +1,8 @@
 package chip8;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.Random;
 
 public class Chip8 {
@@ -9,18 +12,17 @@ public class Chip8 {
 	private int PC, delay_timer, sound_timer;
 	private byte SP,key;
 	private short I;
-	private byte[] V, memory;
+	private byte[] V, memory,rom;
 	private byte[][] display;
 	private int[] stack;
 	private Random random;
 	private Touche input;
-	
 	// Attributs relatifs au temps et rythme d'interprétation des instructions
 	double rate, per, allowance;
 	long current, passed, last_checked;
 	
 	/**
-	 * Constructeur
+	 * Constructeur pour les tests où la rom n'est pas nécessaire
 	 */
 	public Chip8(){
 		this.PC = 0;
@@ -29,21 +31,78 @@ public class Chip8 {
 		this.V = new byte[16];
 		this.random = new Random(567765);
 		this.memory = new byte[4096];
-
+		System.out.println("Load");
 		// 14 instructions pour 100 ms
 		rate = 14;
 		per = 100;
 		allowance = rate;
 		last_checked = System.currentTimeMillis();
 
-
-		
 		display = initDisplay();
 	}
 	
 	/**
+	 * Constructeur pour l'émulateur
+	 * @param rom
+	 * @param touche
+	 */
+	public Chip8(File rom, Touche touche) {
+		this.PC = 0;
+		this.SP = 0;
+		this.setStack(new int[16]);
+		this.V = new byte[16];
+		this.random = new Random(567765);
+		this.memory = new byte[4096];
+		System.out.println("Load");
+		loadMemory();
+		// 14 instructions pour 100 ms
+		rate = 14;
+		per = 100;
+		allowance = rate;
+		last_checked = System.currentTimeMillis();
+
+		display = initDisplay();
+		loadRom(rom);
+		this.input = touche;
+	}
+
+	/**
+	 * Charge la rom en mémoire
+	 * @param romPath
+	 */
+	@SuppressWarnings("resource")
+	public void loadRom(File rom){
+		InputStream stream;
+		if(rom == null){
+			System.out.println("D");
+		}
+		System.out.println("ouverture du try");
+		try{
+			stream = new FileInputStream(rom);
+			int tmp=0,taille = 0 ;
+			System.out.println("avant boucle");
+			for(int x = 0; tmp !=-1; x++){
+				tmp=stream.read();
+				if(tmp==-1){
+					taille = x;
+				}
+			}
+			System.out.println("Après boucle");
+			this.rom = new byte[taille];
+			stream = new FileInputStream(rom);
+			stream.read(this.rom,0,taille);
+			System.out.println("je colle");
+			System.arraycopy(this.rom, 0, this.getMemory(), 0x200, taille);
+			System.out.println("Fin");
+			stream.close();
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+	}
+	
+	/**
 	 * Charge la mémoire avec les font sprites
-	 * Place le CP à 0x200
+	 * Place le PC à 0x200
 	 */
 	public void loadMemory() {
 		

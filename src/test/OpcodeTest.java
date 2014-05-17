@@ -32,6 +32,7 @@ public class OpcodeTest {
 		assertEquals("PC n'a pas été initialisé au bon endroit", 0x200, chip8.getPC());
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void test00E0() {
 		chip8.opcode(0x00E0);
@@ -354,13 +355,7 @@ public class OpcodeTest {
 
 	@Test
 	public void testDNNN(){
-		
-	}
-	
-	@Test
-	public void testEX9E(){
 		byte[] VTemoins = new byte[16];
-		byte VxTemoin = (byte) 0xE79E;
 		pcTemoin = chip8.getPC();
 		chip8.setV(VTemoins);
 		chip8.opcode(0xD12F);
@@ -391,6 +386,18 @@ public class OpcodeTest {
 			}
 		}
 		assertEquals("PC mal incrémenté",pcTemoin+2,this.chip8.getPC());
+	}
+	
+	@Test
+	public void testEX9E(){
+		byte[] VTemoins = new byte[16];
+		byte VxTemoin = (byte) 0x07;
+		VTemoins[7] = VxTemoin;
+		pcTemoin = chip8.getPC();
+		chip8.setV(VTemoins);
+		chip8.opcode(0xE79E);
+		assertEquals("PC non incrémenté", pcTemoin+4, this.chip8.getPC());
+		
 	}
 	
 	@Test
