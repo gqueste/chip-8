@@ -186,7 +186,7 @@ public class OpcodeTest {
 		assertEquals("PC non incrémenté", pcTemoin+2, this.chip8.getPC());
 		assertEquals("Vx non modifié", (0x0004 + VxTemoin), this.chip8.getV()[3]);
 	}
-	
+
 
 	@Test
 	public void testLimitationNbreOperations(){
@@ -334,7 +334,7 @@ public class OpcodeTest {
 		assertEquals(0x0666, chip8.getI());
 		assertEquals("PC non incrémenté", pcTemoin + 2, chip8.getPC());
 	}
-	
+
 	@Test
 	public void testBNNN(){
 		byte[] VTemoin = new byte[16];	
@@ -344,14 +344,14 @@ public class OpcodeTest {
 		chip8.opcode(0xB304);
 		assertEquals("PC mal incrémenté", VTemoin[0]+nnn, this.chip8.getPC());
 	}
-	
+
 	@Test
 	public void testCNNN(){
 		pcTemoin = chip8.getPC();
 		chip8.opcode(0xC777);
 		assertEquals("PC mal incrémenté",pcTemoin+2,this.chip8.getPC());
 	}
-	
+
 	@Test
 	public void testDNNN(){
 		
@@ -361,62 +361,157 @@ public class OpcodeTest {
 	public void testEX9E(){
 		byte[] VTemoins = new byte[16];
 		byte VxTemoin = (byte) 0xE79E;
-		VTemoins[7] = VxTemoin;
 		pcTemoin = chip8.getPC();
 		chip8.setV(VTemoins);
-		chip8.opcode(0xF79E);
-		assertEquals("PC non incrémenté", pcTemoin+2, this.chip8.getPC());
+		chip8.opcode(0xD12F);
+		int nbByte = (0xD12F & 0xF);
+		// Flag de collision
+		VTemoins[0xF] = 0;
+		//place de X et Y 
+		int xPlace = (VTemoins[1]&0xFF);
+		int yPlace = (VTemoins[2]&0xFF);
+
+		//Boucle d'affichage
+		for(int axeY = 0; axeY < nbByte; axeY++){
+			int pixel = this.chip8.getMemory()[this.chip8.getI()+axeY];
+			for(int axeX = 0 ; axeX<8 ; axeX++){
+				//On vérifie que le pixel n'est pas hors de "l ecran"
+				if((pixel & (0x80>>axeX)) != 0 ){
+					if((xPlace & axeX)>63){
+						continue;
+					}
+					if((yPlace & axeY)>31){
+						continue;
+					}
+					if(this.chip8.getDisplay()[xPlace+axeX][yPlace+axeY] == 1){
+						assertEquals("problème Test",VTemoins[0xF], 1);
+					}
+					assertEquals("Problème changement",this.chip8.getDisplay()[xPlace+axeX][yPlace+axeY],1);
+				}
+			}
+		}
+		assertEquals("PC mal incrémenté",pcTemoin+2,this.chip8.getPC());
 	}
 	
 	@Test
 	public void testEXA1(){
-		
-	}
-	
-	@Test
-	public void testFX07(){
-		
-	}
-	
-	@Test
-	public void testFX0A(){
-		
-	}
-	
-	@Test
-	public void testFX15(){
-		
-	}
-	
-	@Test
-	public void testFX18(){
-		
-	}
-	
-	@Test
-	public void testFX1E(){
-		
-	}
-	
-	@Test
-	public void testFX29(){
-		
-	}
-	
-	@Test
-	public void testFX33(){
-		
-	}
-	
-	@Test
-	public void testFX55(){
-		
-	}
-	
-	@Test
-	public void testFX65(){
 		byte[] VTemoins = new byte[16];
-		
+		byte VxTemoin = (byte) 0x07;
+		VTemoins[7] = VxTemoin;
+		pcTemoin = chip8.getPC();
+		chip8.setV(VTemoins);
+		chip8.opcode(0xE7A1);
+		assertEquals("PC non incrémenté", pcTemoin+4, this.chip8.getPC());
 	}
 
+	@Test
+	public void testFX07(){
+		byte[] VTemoins = new byte[16];
+		chip8.setV(VTemoins);
+		chip8.opcode(0xF707);
+		byte dTimer = (byte)chip8.getDelay_timer();
+		assertEquals("Le setter n'a pas fonctionné",dTimer,this.chip8.getV()[6]);
+	}
+
+	@Test
+	public void testFX0A(){
+		byte[] VTemoins = new byte[16];
+		chip8.setV(VTemoins);
+		chip8.opcode(0xF70A);
+		assertEquals("Le setter n'a pas fonctionné",0x07,this.chip8.getV()[7]);
+	}
+
+	@Test
+	public void testFX15(){
+		byte[] VTemoins = new byte[16];
+		byte VxTemoin = (byte) 0x07;
+		VTemoins[9] = VxTemoin;
+		chip8.setV(VTemoins);
+		chip8.opcode(0xF915);
+		assertEquals("Le setter n'a pas fonctionné",(this.chip8.getV()[9] & 0xFF),this.chip8.getDelay_timer());
+	}
+
+	@Test
+	public void testFX18(){
+		byte[] VTemoins = new byte[16];
+		byte VxTemoin = (byte) 0x07;
+		VTemoins[9] = VxTemoin;
+		chip8.setV(VTemoins);
+		chip8.opcode(0xF918);
+		assertEquals("Le setter n'a pas fonctionné",(this.chip8.getV()[9] & 0xFF),this.chip8.getSound_timer());
+	}
+
+	@Test
+	public void testFX1E(){
+		byte[] VTemoins = new byte[16];
+		short tmpI = chip8.getI();
+		chip8.setV(VTemoins);
+		chip8.opcode(0xF91E);
+		assertEquals("Le setter n'a pas fonctionné",chip8.getI(),tmpI+this.chip8.getV()[9]);
+	}
+
+	@Test
+	public void testFX29(){
+		byte[] VTemoins = new byte[16];
+		chip8.setV(VTemoins);
+		chip8.opcode(0xF929);
+		assertEquals("Le setter n'a pas fonctionné",chip8.getI(),this.chip8.getV()[9]*5);
+
+	}
+
+	@Test
+	public void testFX33(){
+		byte[] VTemoins = new byte[16];
+		chip8.setV(VTemoins);
+		char tmpChaine[] = String.valueOf((int)(VTemoins[4] & 0xFF)).toCharArray();
+		char BCD[] = {0,0,0};
+		for(int place=0,count=2;place<tmpChaine.length;place++,count--){
+			BCD[count]=tmpChaine[place];
+		}
+		chip8.opcode(0xF433);
+		for(int i=0;i<3;i++){
+			if(BCD[i]==0){
+				assertEquals("Inégalité",
+						this.chip8.getMemory()[this.chip8.getI() + i],
+						0);
+			}else{
+				assertEquals("Inégalité",
+						this.chip8.getMemory()[this.chip8.getI() + i],
+						(byte)Character.getNumericValue(BCD[i]));
+			}
+		}
+	}
+
+	@Test
+	public void testFX55(){
+		int iter = 9;
+		byte[] VTemoins = new byte[16];
+		chip8.setV(VTemoins);
+		byte[] memory = chip8.getMemory();
+		short i = chip8.getI();
+		chip8.opcode(0xF955);
+		for(int j = 0 ; j < iter ; j++){
+			assertEquals("Inégalité à la "+j+"ème itérations",
+					memory[i+j],VTemoins[j] );
+
+		}
+
+	}
+
+	@Test
+	public void testFX65(){
+		int iter = 9;
+		byte[] VTemoins = new byte[16];
+		chip8.setV(VTemoins);
+		byte[] memory = chip8.getMemory();
+		short i = chip8.getI();
+		chip8.opcode(0xF965);
+		for(int j = 0 ; j < iter ; j++){
+			assertEquals("Inégalité à la "+j+"ème itérations",
+					VTemoins[j],
+					memory[i+j] );
+
+		}
+
+	}
 }

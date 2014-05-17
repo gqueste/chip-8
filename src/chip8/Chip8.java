@@ -6,7 +6,7 @@ public class Chip8 {
 	
 	//private final int LIMIT_NUMBER-INSTRUCTION;
 
-	private int PC, delay_timer, sound_timer, instruction_count;
+	private int PC, delay_timer, sound_timer;
 	private byte SP,key;
 	private short I;
 	private byte[] V, memory;
@@ -119,16 +119,26 @@ public class Chip8 {
 	public void lire() {
 		if(limitationNbreOperations()) {
 			return;
+		}		
+		
+		int msb, lsb, total;
+
+		msb = (((int)memory[PC]) & 0xFF);
+		lsb = (((int)memory[PC + 1]) & 0xFF);
+		total = ((msb << 8) | lsb);
+		short opcodeRecupere = (short)total;
+		
+		opcode(opcodeRecupere);
+
+		if(delay_timer > 0){
+			delay_timer--;
 		}
-		
-		if(instruction_count == 5){
-			instruction_count = 0;
+		if(sound_timer > 0) {
+			if(sound_timer == 1) {
+				//TODO playSound
+			}
+			sound_timer--;
 		}
-		
-		
-		//short opCodeLu = ;
-		
-		
 	}
 	
 	/**
@@ -355,7 +365,11 @@ public class Chip8 {
 			// on récupère le reste de l'instruction
 			if(kk == 0x9E){
 				//On skip si la bonne touche est pressée
-				key = input.getInput();
+				//TODO
+				// créer la frame
+//				key = input.getInput();
+				//TEMP
+				key=0x07;
 				if(V[x]==key){
 					PC+=4;
 				}else{
@@ -363,7 +377,10 @@ public class Chip8 {
 				}
 			}else if(kk == 0xA1){
 				//On skip si la bonne touche n est pas press�e
-				key = input.getInput();
+				//TODO
+				//Créer la frame
+//				key = input.getInput();
+				key = 0x08;
 				if(V[x]==key){
 					PC+=2;
 				}else{
@@ -375,7 +392,6 @@ public class Chip8 {
 			/**
 			 * Toutes les instructions qui commence par F
 			 */
-			kk = (short)(opcode & 0x00FF);
 			switch(kk){
 			case 0x07:
 				//On set la valeur du Vx à celle du delay_timer
@@ -384,15 +400,16 @@ public class Chip8 {
 			case 0x0A:
 				//On récupère une valeur d'input et on la stocke dans Vx
 				//Petite boucle pour éviter une boucle infinie qui rend impossible la récuperation de l'input
-				do{
-					key = input.getInput();
-					try {
-						Thread.sleep(10);
-					} catch(InterruptedException ex) {
-						Thread.currentThread().interrupt();
-					}
-				} while(key == -1);
-
+//				TODO à décommenter quand la Frame sera crée
+//				do{
+//					key = input.getInput();
+//					try {
+//						Thread.sleep(10);
+//					} catch(InterruptedException ex) {
+//						Thread.currentThread().interrupt();
+//					}
+//				} while(key == -1);
+				key = 0x07;
 				V[x] = key;
 				break;
 			case 0x15:
@@ -522,14 +539,6 @@ public class Chip8 {
 
 	public void setSound_timer(int sound_timer) {
 		this.sound_timer = sound_timer;
-	}
-
-	public int getInstruction_count() {
-		return instruction_count;
-	}
-
-	public void setInstruction_count(int instruction_count) {
-		this.instruction_count = instruction_count;
 	}
 
 	public byte getKey() {
