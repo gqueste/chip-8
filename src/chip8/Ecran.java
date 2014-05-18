@@ -18,23 +18,22 @@ public class Ecran extends JComponent{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	@SuppressWarnings("unused")
-	private Color couleurPixel, background;
+	private Color couleurPixel;
 	private byte[][] ramGraphique;
 	
 	public Ecran (byte[][] ramGraphique){
 		this.ramGraphique = ramGraphique;
 		//Affichage Monochrome donc blanc et noir
 		couleurPixel = Color.WHITE;
-		background = Color.BLACK;
 	}
 	
-	public void painComponent (Graphics graph){
+	public void paintComponent (Graphics graph){
 		// Affichage 64 * 32 pixels Chip8
 		// Déclaration des variables
 		// Affichage 2D
-		Graphics2D g = (Graphics2D) graph;
-		g.setColor(couleurPixel);
+		Graphics2D back = (Graphics2D) graph;
+		Graphics2D pix = (Graphics2D) graph;
+		pix.setColor(couleurPixel);
 		Rectangle2D rect;
 		PixelChip8[][] pixels = new PixelChip8[64][32];
 		for(int x = 0 ; x < 64 ; x++){
@@ -42,9 +41,11 @@ public class Ecran extends JComponent{
 				if(ramGraphique[x][y] == 1){
 					PixelChip8 pixel = new PixelChip8(true);
 					pixels[x][y] = pixel;
-					rect = new Rectangle2D.Double((double)x,(double)y, (double)pixel.getLargeur(), (double)pixel.getHauteur());
-					g.fill(rect);
-					g.draw(rect);
+					int xMul = pixel.getLargeur();
+					int yMul = pixel.getHauteur();
+					rect = new Rectangle2D.Double((double)x*xMul,(double)y*yMul, (double)xMul, (double)yMul);
+					back.fill(rect);
+					back.draw(rect);
 				}
 			}
 		}

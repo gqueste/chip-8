@@ -372,10 +372,10 @@ public class OpcodeTest {
 			for(int axeX = 0 ; axeX<8 ; axeX++){
 				//On vérifie que le pixel n'est pas hors de "l ecran"
 				if((pixel & (0x80>>axeX)) != 0 ){
-					if((xPlace & axeX)>63){
+					if((xPlace + axeX)>63){
 						continue;
 					}
-					if((yPlace & axeY)>31){
+					if((yPlace + axeY)>31){
 						continue;
 					}
 					if(this.chip8.getDisplay()[xPlace+axeX][yPlace+axeY] == 1){

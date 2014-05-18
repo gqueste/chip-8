@@ -28,8 +28,16 @@ public class Touche {
 			
 			@Override
 			public void keyTyped(KeyEvent arg0) {
-				//Switch pour récupérer l'input
-				// on fait un lowercase comme ç pas besoin de gérer la casse
+			}
+			
+			@Override
+			public void keyReleased(KeyEvent arg0) {
+			}
+			
+			@Override
+			public void keyPressed(KeyEvent arg0) {
+				//Switch pour rÃ©cupÃ©rer l'input
+				// on fait un lowercase comme a pas besoin de gÃ©rer la casse
 				key = arg0.getKeyChar();
 				switch(Character.toLowerCase(key)) {
 				case '1':
@@ -81,14 +89,6 @@ public class Touche {
 					keyHexa = 0x0F;
 					break;
 				}
-			}
-			
-			@Override
-			public void keyReleased(KeyEvent arg0) {
-			}
-			
-			@Override
-			public void keyPressed(KeyEvent arg0) {
 			}
 		});
 	}

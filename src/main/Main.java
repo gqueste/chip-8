@@ -1,5 +1,6 @@
 package main;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.io.File;
 
@@ -14,10 +15,11 @@ public class Main {
 
 	public static void main(String[] args) {
 		JFrame fenetreJeu = new JFrame();
-		fenetreJeu.setSize(new Dimension(300,200));
+		fenetreJeu.setSize(new Dimension(800,600));
 		fenetreJeu.setTitle("Emulateur Chip8 : Projet CHIP-8 EMN 2014");
 		fenetreJeu.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		fenetreJeu.setResizable(true);
+		fenetreJeu.getContentPane().setBackground(Color.BLACK);
 		// On ouvre un explorateur pour choisir une ROM
 		JFileChooser chooser = new JFileChooser();
 		int returnVal;
@@ -36,6 +38,11 @@ public class Main {
 		fenetreJeu.add(ecran);
 		fenetreJeu.setVisible(true);
 
+		do{
+			chip8.lire();
+			fenetreJeu.repaint();
+		}while(true);
+		
 	}
 
 }

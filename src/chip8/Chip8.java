@@ -62,8 +62,8 @@ public class Chip8 {
 		last_checked = System.currentTimeMillis();
 
 		display = initDisplay();
-		loadRom(rom);
 		this.input = touche;
+		loadRom(rom);
 	}
 
 	/**
@@ -402,10 +402,10 @@ public class Chip8 {
 				for(int axeX = 0 ; axeX<8 ; axeX++){
 					//On vérifie que le pixel n'est pas hors de "l ecran"
 					if((pixel & (0x80>>axeX)) != 0 ){
-						if((xPlace & axeX)>63){
+						if((xPlace + axeX)>63){
 							continue;
 						}
-						if((yPlace & axeY)>31){
+						if((yPlace + axeY)>31){
 							continue;
 						}
 						if(display[xPlace+axeX][yPlace+axeY] == 1){
@@ -424,11 +424,9 @@ public class Chip8 {
 			// on récupère le reste de l'instruction
 			if(kk == 0x9E){
 				//On skip si la bonne touche est pressée
-				//TODO
-				// créer la frame
-//				key = input.getInput();
-				//TEMP
-				key=0x07;
+				key = input.getInput();
+				// a décommenter pour les test
+//				key=0x07;
 				if(V[x]==key){
 					PC+=4;
 				}else{
@@ -459,16 +457,15 @@ public class Chip8 {
 			case 0x0A:
 				//On récupère une valeur d'input et on la stocke dans Vx
 				//Petite boucle pour éviter une boucle infinie qui rend impossible la récuperation de l'input
-//				TODO à décommenter quand la Frame sera crée
-//				do{
-//					key = input.getInput();
-//					try {
-//						Thread.sleep(10);
-//					} catch(InterruptedException ex) {
-//						Thread.currentThread().interrupt();
-//					}
-//				} while(key == -1);
-				key = 0x07;
+				do{
+					key = input.getInput();
+					try {
+						Thread.sleep(10);
+					} catch(InterruptedException ex) {
+						Thread.currentThread().interrupt();
+					}
+				} while(key == -1);
+//				key = 0x07;
 				V[x] = key;
 				break;
 			case 0x15:
