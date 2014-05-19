@@ -45,12 +45,12 @@ public class OpcodeTest {
 		chip8.setPC(0);
 		chip8.setSP((byte) 1);
 		int[] stackTemoin = new int[16];
-		stackTemoin[1] = 2;
+		stackTemoin[0] = 2;
 		chip8.setStack(stackTemoin);
 
 		chip8.opcode(0x00EE);
 		assertEquals("SP non décrémenté", 0, chip8.getSP());
-		assertEquals("PC précédent non récupéré", stackTemoin[1] +2, chip8.getPC());
+		assertEquals("PC précédent non récupéré", stackTemoin[0] + 2, chip8.getPC());
 	}
 
 	@Test
