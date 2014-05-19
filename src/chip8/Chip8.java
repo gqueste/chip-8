@@ -220,8 +220,8 @@ public class Chip8 {
 				}
 				else if (opcode == 0x00EE){
 					//returns from a subroutine
-					this.PC = this.stack[this.SP];
 					this.SP --;
+					this.PC = this.stack[this.SP];
 					this.PC += 2;
 				}
 			}
@@ -234,8 +234,8 @@ public class Chip8 {
 
 		case 0x2000:
 			// Call a subroutine
-			SP+=2;
 			stack[SP] = PC;
+			SP+=2;
 			PC = (short)(opcode & 0x0FFF);
 			break;
 
