@@ -39,17 +39,18 @@ public class Touche {
 				//Switch pour récupérer l'input
 				// on fait un lowercase comme a pas besoin de gérer la casse
 				key = arg0.getKeyChar();
+				System.out.println("Touche appuyée : "+key);
 				switch(Character.toLowerCase(key)) {
-				case '1':
+				case '&':
 					keyHexa = 0x01;
 					break;
-				case '2':
+				case 'é':
 					keyHexa = 0x02;
 					break;
-				case '3':
+				case '"':
 					keyHexa = 0x03;
 					break;
-				case '4':
+				case '\'':
 					keyHexa = 0x0C;
 					break;
 				case 'q':

@@ -205,7 +205,6 @@ public class OpcodeTest {
 	}
 
 	public void test8XY0(){
-		byte x = chip8.getV()[4];
 		byte y = chip8.getV()[2];
 		pcTemoin = chip8.getPC();
 		chip8.opcode(0x8420);
@@ -278,7 +277,6 @@ public class OpcodeTest {
 	@Test
 	public void test8XY6(){
 		byte x = chip8.getV()[4];
-		byte y = chip8.getV()[2];
 		byte res = (byte) (x / 2);
 		pcTemoin = chip8.getPC();
 		chip8.opcode(0x8426);
@@ -302,7 +300,6 @@ public class OpcodeTest {
 	@Test
 	public void test8XYE(){
 		byte x = chip8.getV()[4];
-		byte y = chip8.getV()[2];
 		byte res = (byte) (x*2);
 		pcTemoin = chip8.getPC();
 		chip8.opcode(0x8425);
@@ -395,6 +392,7 @@ public class OpcodeTest {
 		VTemoins[7] = VxTemoin;
 		pcTemoin = chip8.getPC();
 		chip8.setV(VTemoins);
+		chip8.setKey((byte)0x07);
 		chip8.opcode(0xE79E);
 		assertEquals("PC non incrémenté", pcTemoin+4, this.chip8.getPC());
 		
@@ -424,6 +422,7 @@ public class OpcodeTest {
 	public void testFX0A(){
 		byte[] VTemoins = new byte[16];
 		chip8.setV(VTemoins);
+		chip8.setKey((byte)0x07);
 		chip8.opcode(0xF70A);
 		assertEquals("Le setter n'a pas fonctionné",0x07,this.chip8.getV()[7]);
 	}

@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.util.Random;
 
 public class Chip8 {
-	
+
 	//private final int LIMIT_NUMBER-INSTRUCTION;
 
 	private int PC, delay_timer, sound_timer;
@@ -20,7 +20,7 @@ public class Chip8 {
 	// Attributs relatifs au temps et rythme d'interprétation des instructions
 	double rate, per, allowance;
 	long current, passed, last_checked;
-	
+
 	/**
 	 * Constructeur pour les tests où la rom n'est pas nécessaire
 	 */
@@ -40,7 +40,7 @@ public class Chip8 {
 
 		display = initDisplay();
 	}
-	
+
 	/**
 	 * Constructeur pour l'émulateur
 	 * @param rom
@@ -53,7 +53,6 @@ public class Chip8 {
 		this.V = new byte[16];
 		this.random = new Random(567765);
 		this.memory = new byte[4096];
-		System.out.println("Load");
 		loadMemory();
 		// 14 instructions pour 100 ms
 		rate = 14;
@@ -73,10 +72,6 @@ public class Chip8 {
 	@SuppressWarnings("resource")
 	public void loadRom(File rom){
 		InputStream stream;
-		if(rom == null){
-			System.out.println("D");
-		}
-		System.out.println("ouverture du try");
 		try{
 			stream = new FileInputStream(rom);
 			int tmp=0,taille = 0 ;
@@ -87,25 +82,22 @@ public class Chip8 {
 					taille = x;
 				}
 			}
-			System.out.println("Après boucle");
 			this.rom = new byte[taille];
 			stream = new FileInputStream(rom);
 			stream.read(this.rom,0,taille);
-			System.out.println("je colle");
 			System.arraycopy(this.rom, 0, this.getMemory(), 0x200, taille);
-			System.out.println("Fin");
 			stream.close();
 		}catch (Exception e){
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Charge la mémoire avec les font sprites
 	 * Place le PC à 0x200
 	 */
 	public void loadMemory() {
-		
+
 		// Set the font sprites
 		int[] font = {
 				0xF0, 0x90, 0x90, 0x90, 0xF0,
@@ -144,7 +136,7 @@ public class Chip8 {
 		}
 		return screen;
 	}
-	
+
 	/**
 	 * Détermine s'il y a suffisamment de temps pour interpréter
 	 * une nouvelle opération
@@ -168,7 +160,7 @@ public class Chip8 {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Controle l'exécution de l'interpreter
 	 * Limite le nombre d'exécutions lues
@@ -179,14 +171,14 @@ public class Chip8 {
 		if(limitationNbreOperations()) {
 			return;
 		}		
-		
+
 		int msb, lsb, total;
 
 		msb = (((int)memory[PC]) & 0xFF);
 		lsb = (((int)memory[PC + 1]) & 0xFF);
 		total = ((msb << 8) | lsb);
 		short opcodeRecupere = (short)total;
-		
+
 		opcode(opcodeRecupere);
 
 		if(delay_timer > 0){
@@ -199,7 +191,7 @@ public class Chip8 {
 			sound_timer--;
 		}
 	}
-	
+
 	/**
 	 * Interprète le code d'opération reçu
 	 * @param opcode, int
@@ -293,7 +285,7 @@ public class Chip8 {
 			V[x] += (byte) kk;
 			PC += 2;
 			break;
-			
+
 		case 0x8000:
 			//TODO setter
 			byte vx = this.V[x];
@@ -424,9 +416,9 @@ public class Chip8 {
 			// on récupère le reste de l'instruction
 			if(kk == 0x9E){
 				//On skip si la bonne touche est pressée
-				key = input.getInput();
-				// a décommenter pour les test
-//				key=0x07;
+				if(input != null){
+					key = input.getInput();
+				}
 				if(V[x]==key){
 					PC+=4;
 				}else{
@@ -436,7 +428,7 @@ public class Chip8 {
 				//On skip si la bonne touche n est pas press�e
 				//TODO
 				//Créer la frame
-//				key = input.getInput();
+				//				key = input.getInput();
 				key = 0x08;
 				if(V[x]==key){
 					PC+=2;
@@ -457,15 +449,16 @@ public class Chip8 {
 			case 0x0A:
 				//On récupère une valeur d'input et on la stocke dans Vx
 				//Petite boucle pour éviter une boucle infinie qui rend impossible la récuperation de l'input
-				do{
-					key = input.getInput();
-					try {
-						Thread.sleep(10);
-					} catch(InterruptedException ex) {
-						Thread.currentThread().interrupt();
-					}
-				} while(key == -1);
-//				key = 0x07;
+				if(input != null){
+					do{
+						key = input.getInput();
+						try {
+							Thread.sleep(10);
+						} catch(InterruptedException ex) {
+							Thread.currentThread().interrupt();
+						}
+					} while(key == -1);
+				}
 				V[x] = key;
 				break;
 			case 0x15:
@@ -485,7 +478,7 @@ public class Chip8 {
 				I = (short)(V[x]*5);
 				break;
 			case 0x33:
-//				On stock la représentation BCD du registre vr dans I,I+1,I+2
+				//				On stock la représentation BCD du registre vr dans I,I+1,I+2
 				char chaine[] = String.valueOf((int)(V[x] & 0xFF)).toCharArray();
 				char BCD[]={0,0,0};
 				for(int place=0,count=2;place<chaine.length;place++,count--){
@@ -505,7 +498,7 @@ public class Chip8 {
 			case 0x55:
 				for(int i = 0; i <= x; i++)
 					memory[I + i] = V[i];
-				
+
 				break;
 			case 0x65:
 				for(int i = 0;i<=x;i++){
