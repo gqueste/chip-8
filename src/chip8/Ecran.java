@@ -31,21 +31,20 @@ public class Ecran extends JComponent{
 		// Affichage 64 * 32 pixels Chip8
 		// Déclaration des variables
 		// Affichage 2D
-		Graphics2D back = (Graphics2D) graph;
 		Graphics2D pix = (Graphics2D) graph;
 		pix.setColor(couleurPixel);
 		Rectangle2D rect;
-		PixelChip8[][] pixels = new PixelChip8[64][32];
+//		PixelChip8[][] pixels = new PixelChip8[64][32];
 		for(int x = 0 ; x < 64 ; x++){
 			for(int y = 0 ; y < 32 ; y++){
 				if(ramGraphique[x][y] == 1){
-					PixelChip8 pixel = new PixelChip8(true);
-					pixels[x][y] = pixel;
-					int xMul = pixel.getLargeur();
-					int yMul = pixel.getHauteur();
-					rect = new Rectangle2D.Double((double)x*xMul,(double)y*yMul, (double)xMul, (double)yMul);
-					back.fill(rect);
-					back.draw(rect);
+//					PixelChip8 pixel = new PixelChip8(true);
+//					pixels[x][y] = pixel;
+//					int xMul = pixel.getLargeur();
+//					int yMul = pixel.getHauteur();
+					rect = new Rectangle2D.Double((double)x*8,(double)y*8, (double)8, (double)8);
+					pix.fill(rect);
+					pix.draw(rect);
 				}
 			}
 		}

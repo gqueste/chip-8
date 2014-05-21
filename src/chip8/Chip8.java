@@ -52,6 +52,7 @@ public class Chip8 {
 	 * @param touche
 	 */
 	public Chip8(File rom, ToucheListener touche) {
+		this.I = 0x0;
 		this.PC = 0;
 		this.SP = 0;
 		this.setStack(new int[16]);
@@ -80,7 +81,6 @@ public class Chip8 {
 	 * Charge la rom en mémoire
 	 * @param romPath
 	 */
-	@SuppressWarnings("resource")
 	public void loadRom(File rom){
 		InputStream stream;
 		try{
@@ -92,6 +92,7 @@ public class Chip8 {
 					taille = x;
 				}
 			}
+			stream.close();
 			this.rom = new byte[taille];
 			stream = new FileInputStream(rom);
 			stream.read(this.rom,0,taille);
@@ -201,7 +202,7 @@ public class Chip8 {
 		int first = opcode & 0xF000;
 		int last = opcode & 0x000F;
 
-		System.out.println("Opcode : " +  String.format("0x%4s", Integer.toHexString(opcode)).replace(' ', '0'));
+//		System.out.println("Opcode : " +  String.format("0x%4s", Integer.toHexString(opcode)).replace(' ', '0'));
 		switch (first) {
 		case 0x0000 :
 			if(x != 0x0000) {
@@ -297,7 +298,7 @@ public class Chip8 {
 			else if(last == 0x0002){
 				this.V[x] = (byte) (vx & vy);
 			}
-			else if(last == 0x0003){
+			else if(first == 0x0003){
 				this.V[x] = (byte) (vx ^ vy);
 			}
 			else if(last == 0x0004){
@@ -387,9 +388,10 @@ public class Chip8 {
 			int yPlace = (V[y]&0xFF);
 
 			//Boucle d'affichage
-			for(int axeY = 0; axeY < nbByte; axeY++){
-				int pixel = memory[I+axeY];
-				for(int axeX = 0 ; axeX<8 ; axeX++){
+			for(short axeY = 0; axeY < nbByte; axeY++){
+				short pixel = memory[I+axeY];
+//				System.out.println(String.format("pixel : %x, %x", pixel, I+axeY));
+				for(short axeX = 0 ; axeX<8 ; axeX++){
 					//On vérifie que le pixel n'est pas hors de "l ecran"
 					if((pixel & (0x80>>axeX)) != 0 ){
 						if((xPlace + axeX)>63){
@@ -403,6 +405,7 @@ public class Chip8 {
 						}
 						display[xPlace+axeX][yPlace+axeY] ^= 1;
 					}
+//					System.out.println(String.format("pixel : %x, %x", pixel, xPlace+axeX));
 				}
 			}
 			PC +=2;
@@ -414,8 +417,8 @@ public class Chip8 {
 			// on récupère le reste de l'instruction
 			if(kk == 0x9E){
 				//On skip si la bonne touche est pressée
+				Thread.yield();
 				key = input.getInput();
-				System.out.println(key);
 				if(V[x]==key){
 					PC+=4;
 				}else{
@@ -423,6 +426,7 @@ public class Chip8 {
 				}
 			}else if(kk == 0xA1){
 				//On skip si la bonne touche n est pas pressée
+				Thread.yield();
 				key = input.getInput();
 				if(V[x]!=key){
 					PC+=4;
@@ -443,6 +447,7 @@ public class Chip8 {
 			case 0x0A:
 				//On récupère une valeur d'input et on la stocke dans Vx
 				//Petite boucle pour éviter une boucle infinie qui rend impossible la récuperation de l'input
+				Thread.yield();
 				key = input.getInput();
 				if(key ==-1){
 					PC -= 4;
@@ -467,7 +472,7 @@ public class Chip8 {
 				I = (short)(V[x]*5);
 				break;
 			case 0x33:
-				//				On stock la représentation BCD du registre vr dans I,I+1,I+2
+				//On stock la représentation BCD du registre vr dans I,I+1,I+2
 				char chaine[] = String.valueOf((int)(V[x] & 0xFF)).toCharArray();
 				char BCD[]={0,0,0};
 				for(int place=0,count=2;place<chaine.length;place++,count--){
