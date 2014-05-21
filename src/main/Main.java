@@ -21,7 +21,7 @@ public class Main {
 		fenetreJeu.setResizable(true);
 		fenetreJeu.getContentPane().setBackground(Color.BLACK);
 		// On ouvre un explorateur pour choisir une ROM
-		JFileChooser chooser = new JFileChooser();
+		JFileChooser chooser = new JFileChooser(File.separator+System.getProperty("user.home")+File.separator+"git"+File.separator+"chip-8"+File.separator+"roms");
 		int returnVal;
 		do{
 			returnVal = chooser.showOpenDialog(null);
