@@ -206,7 +206,7 @@ public class Chip8 {
 		int first = opcode & 0xF000;
 		int last = opcode & 0x000F;
 
-
+		//System.out.println("Opcode : " +  String.format("0x%4s", Integer.toHexString(opcode)).replace(' ', '0'));
 		switch (first) {
 		case 0x0000 :
 			if(x != 0x0000) {
@@ -235,7 +235,7 @@ public class Chip8 {
 		case 0x2000:
 			// Call a subroutine
 			stack[SP] = PC;
-			SP+=2;
+			SP++;
 			PC = (short)(opcode & 0x0FFF);
 			break;
 
