@@ -16,7 +16,7 @@ public class Chip8 {
 	private byte[][] display;
 	private int[] stack;
 	private Random random;
-	private Touche input;
+	private ToucheListener input;
 	// Attributs relatifs au temps et rythme d'interprétation des instructions
 	double rate, per, allowance;
 	long current, passed, last_checked;
@@ -46,7 +46,7 @@ public class Chip8 {
 	 * @param rom
 	 * @param touche
 	 */
-	public Chip8(File rom, Touche touche) {
+	public Chip8(File rom, ToucheListener touche) {
 		this.PC = 0;
 		this.SP = 0;
 		this.setStack(new int[16]);
@@ -75,7 +75,6 @@ public class Chip8 {
 		try{
 			stream = new FileInputStream(rom);
 			int tmp=0,taille = 0 ;
-			System.out.println("avant boucle");
 			for(int x = 0; tmp !=-1; x++){
 				tmp=stream.read();
 				if(tmp==-1){
@@ -177,8 +176,7 @@ public class Chip8 {
 		msb = (((int)memory[PC]) & 0xFF);
 		lsb = (((int)memory[PC + 1]) & 0xFF);
 		total = ((msb << 8) | lsb);
-		short opcodeRecupere = (short)total;
-
+		int opcodeRecupere = total;
 		opcode(opcodeRecupere);
 
 		if(delay_timer > 0){
@@ -186,7 +184,6 @@ public class Chip8 {
 		}
 		if(sound_timer > 0) {
 			if(sound_timer == 1) {
-				//TODO playSound
 			}
 			sound_timer--;
 		}
@@ -206,7 +203,7 @@ public class Chip8 {
 		int first = opcode & 0xF000;
 		int last = opcode & 0x000F;
 
-		//System.out.println("Opcode : " +  String.format("0x%4s", Integer.toHexString(opcode)).replace(' ', '0'));
+		System.out.println("Opcode : " +  String.format("0x%4s", Integer.toHexString(opcode)).replace(' ', '0'));
 		switch (first) {
 		case 0x0000 :
 			if(x != 0x0000) {
@@ -287,7 +284,6 @@ public class Chip8 {
 			break;
 
 		case 0x8000:
-			//TODO setter
 			byte vx = this.V[x];
 			byte vy = this.V[y];
 			if(last == 0x0000){
@@ -416,24 +412,24 @@ public class Chip8 {
 			// on récupère le reste de l'instruction
 			if(kk == 0x9E){
 				//On skip si la bonne touche est pressée
-				if(input != null){
+				if(key==-1){
 					key = input.getInput();
 				}
+				System.out.println(key);
 				if(V[x]==key){
 					PC+=4;
 				}else{
 					PC+=2;
 				}
 			}else if(kk == 0xA1){
-				//On skip si la bonne touche n est pas press�e
-				//TODO
-				//Créer la frame
-				//				key = input.getInput();
-				key = 0x08;
-				if(V[x]==key){
-					PC+=2;
-				}else{
+				//On skip si la bonne touche n est pas pressée
+				if(key==-1){
+					key = input.getInput();
+				}
+				if(V[x]!=key){
 					PC+=4;
+				}else{
+					PC+=2;
 				}
 			}
 			break;
@@ -449,17 +445,14 @@ public class Chip8 {
 			case 0x0A:
 				//On récupère une valeur d'input et on la stocke dans Vx
 				//Petite boucle pour éviter une boucle infinie qui rend impossible la récuperation de l'input
-				if(input != null){
-					do{
-						key = input.getInput();
-						try {
-							Thread.sleep(10);
-						} catch(InterruptedException ex) {
-							Thread.currentThread().interrupt();
-						}
-					} while(key == -1);
+				if(key==-1){
+					key = input.getInput();
 				}
-				V[x] = key;
+				if(key ==-1){
+					PC -= 2;
+				}else{
+					V[x] = key;
+				}
 				break;
 			case 0x15:
 				// On set le delay_timer à Vx
@@ -606,11 +599,11 @@ public class Chip8 {
 		this.random = random;
 	}
 
-	public Touche getInput() {
+	public ToucheListener getInput() {
 		return input;
 	}
 
-	public void setInput(Touche input) {
+	public void setInput(ToucheListener input) {
 		this.input = input;
 	}
 

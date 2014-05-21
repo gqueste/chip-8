@@ -3,10 +3,15 @@ package test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
+import java.awt.Frame;
+import java.awt.Robot;
+import java.awt.event.KeyEvent;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import chip8.Chip8;
+import chip8.ToucheListener;
 
 public class OpcodeTest {
 
@@ -390,8 +395,10 @@ public class OpcodeTest {
 		byte[] VTemoins = new byte[16];
 		byte VxTemoin = (byte) 0x07;
 		VTemoins[7] = VxTemoin;
+		ToucheListener touche = new ToucheListener();
 		pcTemoin = chip8.getPC();
 		chip8.setV(VTemoins);
+		chip8.setInput(touche);
 		chip8.setKey((byte)0x07);
 		chip8.opcode(0xE79E);
 		assertEquals("PC non incrémenté", pcTemoin+4, this.chip8.getPC());
@@ -403,8 +410,10 @@ public class OpcodeTest {
 		byte[] VTemoins = new byte[16];
 		byte VxTemoin = (byte) 0x07;
 		VTemoins[7] = VxTemoin;
+		ToucheListener touche = new ToucheListener();
 		pcTemoin = chip8.getPC();
 		chip8.setV(VTemoins);
+		chip8.setInput(touche);
 		chip8.opcode(0xE7A1);
 		assertEquals("PC non incrémenté", pcTemoin+4, this.chip8.getPC());
 	}
@@ -421,7 +430,9 @@ public class OpcodeTest {
 	@Test
 	public void testFX0A(){
 		byte[] VTemoins = new byte[16];
+		ToucheListener touche = new ToucheListener();
 		chip8.setV(VTemoins);
+		chip8.setInput(touche);
 		chip8.setKey((byte)0x07);
 		chip8.opcode(0xF70A);
 		assertEquals("Le setter n'a pas fonctionné",0x07,this.chip8.getV()[7]);

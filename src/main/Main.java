@@ -9,7 +9,7 @@ import javax.swing.JFrame;
 
 import chip8.Chip8;
 import chip8.Ecran;
-import chip8.Touche;
+import chip8.ToucheListener;
 
 public class Main {
 
@@ -31,11 +31,12 @@ public class Main {
 		}while (returnVal!=JFileChooser.APPROVE_OPTION);
 
 		File rom = chooser.getSelectedFile();
-		Touche touche = new Touche(fenetreJeu);
+		ToucheListener touche = new ToucheListener();
 		Chip8 chip8 = new Chip8(rom, touche);
 
 		Ecran ecran = new Ecran(chip8.getDisplay());
 		fenetreJeu.add(ecran);
+		fenetreJeu.addKeyListener(touche);
 		fenetreJeu.setVisible(true);
 
 		do{
