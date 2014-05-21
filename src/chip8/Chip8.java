@@ -38,7 +38,12 @@ public class Chip8 {
 		allowance = rate;
 		last_checked = System.currentTimeMillis();
 
-		display = initDisplay();
+		display = new byte[64][32];
+		for(int i=0;i<64;i++){
+			for(int j=0;j<32;j++){
+				this.display[i][j] = 0;
+			}
+		}
 	}
 
 	/**
@@ -60,7 +65,13 @@ public class Chip8 {
 		allowance = rate;
 		last_checked = System.currentTimeMillis();
 
-		display = initDisplay();
+		display = new byte[64][32];
+		for(int i=0;i<64;i++){
+			for(int j=0;j<32;j++){
+				this.display[i][j] = 0;
+			}
+		}
+		
 		this.input = touche;
 		loadRom(rom);
 	}
@@ -122,19 +133,6 @@ public class Chip8 {
 		PC = 0x200;		
 	}
 
-	/**
-	 * Initialise l'écran
-	 * @return display, l'écran initialisé
-	 */
-	public byte[][] initDisplay() {
-		byte[][] screen = new byte[64][32];
-		for(int i=0;i<64;i++){
-			for(int j=0;j<32;j++){
-				screen[i][j] = 0;
-			}
-		}
-		return screen;
-	}
 
 	/**
 	 * Détermine s'il y a suffisamment de temps pour interpréter
@@ -212,7 +210,11 @@ public class Chip8 {
 			else {
 				if(opcode == 0x00E0) {
 					//clear the screen
-					this.display = initDisplay();
+					for(int i=0;i<64;i++){
+						for(int j=0;j<32;j++){
+							this.display[i][j] = 0;
+						}
+					}
 					this.PC += 2;
 				}
 				else if (opcode == 0x00EE){
