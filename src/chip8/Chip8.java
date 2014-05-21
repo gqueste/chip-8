@@ -71,7 +71,7 @@ public class Chip8 {
 				this.display[i][j] = 0;
 			}
 		}
-		
+
 		this.input = touche;
 		loadRom(rom);
 	}
@@ -414,9 +414,7 @@ public class Chip8 {
 			// on récupère le reste de l'instruction
 			if(kk == 0x9E){
 				//On skip si la bonne touche est pressée
-				if(key==-1){
-					key = input.getInput();
-				}
+				key = input.getInput();
 				System.out.println(key);
 				if(V[x]==key){
 					PC+=4;
@@ -425,9 +423,7 @@ public class Chip8 {
 				}
 			}else if(kk == 0xA1){
 				//On skip si la bonne touche n est pas pressée
-				if(key==-1){
-					key = input.getInput();
-				}
+				key = input.getInput();
 				if(V[x]!=key){
 					PC+=4;
 				}else{
@@ -447,11 +443,9 @@ public class Chip8 {
 			case 0x0A:
 				//On récupère une valeur d'input et on la stocke dans Vx
 				//Petite boucle pour éviter une boucle infinie qui rend impossible la récuperation de l'input
-				if(key==-1){
-					key = input.getInput();
-				}
+				key = input.getInput();
 				if(key ==-1){
-					PC -= 2;
+					PC -= 4;
 				}else{
 					V[x] = key;
 				}

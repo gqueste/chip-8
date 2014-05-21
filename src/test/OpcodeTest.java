@@ -3,10 +3,6 @@ package test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
-import java.awt.Frame;
-import java.awt.Robot;
-import java.awt.event.KeyEvent;
-
 import org.junit.Before;
 import org.junit.Test;
 
