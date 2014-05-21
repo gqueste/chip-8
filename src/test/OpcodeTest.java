@@ -82,7 +82,7 @@ public class OpcodeTest {
 		assertEquals("PC mal sauvegardé", pcSauvegarde, pcTemoin);
 
 		//Incrémentation du SP
-		SPTemoins += 2;
+		SPTemoins ++;
 		assertEquals("SP non incrémenté", SPTemoins, chip8.getSP());
 
 		//changement du PC
