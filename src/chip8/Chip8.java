@@ -405,7 +405,6 @@ public class Chip8 {
 						if(display[xPlace+axeX][yPlace+axeY] == 1){
 							V[0xF] = 1;
 						}
-						System.out.println("edit affichage");
 						display[xPlace+axeX][yPlace+axeY] ^= 1;
 					}
 				}
