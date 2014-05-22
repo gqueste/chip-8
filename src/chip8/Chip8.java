@@ -2,8 +2,12 @@ package chip8;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Random;
+
+import sun.audio.AudioPlayer;
+import sun.audio.AudioStream;
 
 public class Chip8 {
 
@@ -18,8 +22,9 @@ public class Chip8 {
 	private Random random;
 	private ToucheListener input;
 	// Attributs relatifs au temps et rythme d'interprétation des instructions
-	double rate, per, allowance;
-	long current, passed, last_checked;
+	private double rate, per, allowance;
+	private long current, passed, last_checked;
+	private AudioStream lecteur;
 
 	/**
 	 * Constructeur pour les tests où la rom n'est pas nécessaire
@@ -76,6 +81,14 @@ public class Chip8 {
 		this.input = touche;
 		this.key = -1;
 		loadRom(rom);
+	}
+	
+	private void loadSound() {
+		try {
+			this.lecteur=new AudioStream(new FileInputStream("src/tone.wav"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -184,6 +197,8 @@ public class Chip8 {
 		}
 		if(sound_timer > 0) {
 			if(sound_timer == 1) {
+				loadSound();
+				AudioPlayer.player.start(this.lecteur);
 			}
 			sound_timer--;
 		}
