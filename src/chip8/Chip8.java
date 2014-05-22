@@ -55,7 +55,7 @@ public class Chip8 {
 		this.I = 0x0;
 		this.PC = 0;
 		this.SP = 0;
-		this.setStack(new int[16]);
+		this.stack = new int[16];
 		this.V = new byte[16];
 		this.random = new Random(567765);
 		this.memory = new byte[4096];
@@ -74,6 +74,7 @@ public class Chip8 {
 		}
 
 		this.input = touche;
+		this.key = -1;
 		loadRom(rom);
 	}
 
@@ -168,7 +169,7 @@ public class Chip8 {
 	public void lire() {
 		if(limitationNbreOperations()) {
 			return;
-		}		
+		}
 
 		int msb, lsb, total;
 
@@ -200,7 +201,6 @@ public class Chip8 {
 		int nnn = (opcode & 0x0FFF);
 
 		int first = opcode & 0xF000;
-		int last = opcode & 0x000F;
 
 //		System.out.println("Opcode : " +  String.format("0x%4s", Integer.toHexString(opcode)).replace(' ', '0'));
 		switch (first) {
@@ -229,7 +229,7 @@ public class Chip8 {
 
 		case 0x1000:
 			// Jump to adress
-			PC = (opcode & 0x0FFF);			
+			PC = (short)(opcode & 0x0FFF);			
 			break;
 
 		case 0x2000:
@@ -260,17 +260,11 @@ public class Chip8 {
 			break;
 
 		case 0x5000:
-			if((opcode & 0x000F) == 0x0000) {
-				//Skip if Vx = Vy
-				if(V[x] == V[y]) {
-					PC += 4;
-				}
-				else {
-					PC += 2;
-				}
+			if(V[x] == V[y]) {
+				PC += 4;
 			}
 			else {
-				System.out.println("Opcode non reconnu : " + String.format("%02X", opcode));
+				PC += 2;
 			}
 			break;
 
@@ -282,72 +276,136 @@ public class Chip8 {
 
 		case 0x7000:
 			//Add to x
-			V[x] += (byte) kk;
+			V[x] = (byte)(V[x] + kk);
 			PC += 2;
 			break;
 
 		case 0x8000:
-			byte vx = this.V[x];
-			byte vy = this.V[y];
-			if(last == 0x0000){
-				this.V[x] = vy;
+		{
+			int mask = (opcode & 0xF);			
+			switch(mask) {
+			case 0x0:
+			{
+				// Set Vx = Vy.
+				V[x] = V[y];
+
+				break;
 			}
-			else if(last == 0x0001){
-				this.V[x] = (byte) (vx | vy);
+			
+			case 0x1:
+			{
+				// Set Vx = Vx OR Vy.
+				
+				V[x] = (byte)(V[x] | V[y]);
+				
+				break;
 			}
-			else if(last == 0x0002){
-				this.V[x] = (byte) (vx & vy);
+			
+			case 0x2:
+			{
+				/*
+				 * Set Vx = Vx AND Vy.
+				 */
+				
+				V[x] = (byte)(V[x] & V[y]);				
+				break;
 			}
-			else if(first == 0x0003){
-				this.V[x] = (byte) (vx ^ vy);
+			
+			case 0x3:
+			{
+				/*
+				 * Set Vx = Vx XOR Vy.
+				 */
+				
+				V[x] ^= V[y];
+				
+				break;
 			}
-			else if(last == 0x0004){
-				byte res = (byte) (vx + vy);
-				if(res > 255){
-					this.V[15] = 1;
-				}
-				else{
-					this.V[15] = 0;
-				}
+			
+			case 0x4:
+			{
+				/*
+				 * Set Vx = Vx + Vy, set VF = carry.
+				 */
+				
+				V[x] = (byte)(V[x] + V[y]);
+				
+				if((V[x] + V[y]) > 255)
+					V[0xF] = 1;
+				else
+					V[0xF] = 0;
+				
+				break;
 			}
-			else if(last == 0x0005){
-				if(vx > vy){
-					this.V[15] = 1;
-				}
-				else{
-					this.V[15] = 0;
-				}
-				this.V[x] = (byte) (vx - vy);
+			
+			case 0x5:
+			{
+				/*
+				 * Set Vx = Vx - Vy, set VF = NOT borrow.
+				 */
+					
+				if(V[x] > V[y])
+					V[0xF] = 1;
+				else
+					V[0xF] = 0;
+				
+				V[x] = (byte)(V[x] - V[y]);
+				
+				break;
 			}
-			else if(last == 0x0006){
-				byte lastOfVX = (byte) (this.V[x] & 0x000F);
-				if(lastOfVX == 1){
-					this.V[15] = 1;
+			
+			case 0x6:
+			{
+				/*
+				 * Set Vx = Vx SHR 1.
+				 */
+
+				// Set carry flag if LSb of Vx is set
+				if((V[x] & 0x1) == 1) {
+					V[0xF] = 1;
 				}
-				else{
-					this.V[15] = 0;
+				else {
+					V[0xF] = 0;
 				}
+				
+				V[x] >>= 1;
+				
+				break;
 			}
-			else if(last == 0x0007){
-				if(vy > vx){
-					this.V[15] = 1;
-				}
-				else{
-					this.V[15] = 0;
-				}
-				this.V[x] = (byte) (vy - vx);
+			
+			case 0x7:
+			{
+				/*
+				 * Set Vx = Vy - Vx, set VF = NOT borrow.
+				 */
+				
+				V[0xF] = (V[y] > V[x]) ? (byte)1 : 0;
+				
+				V[x] = (byte)(V[y] - V[x]);
+				
+				break;
 			}
-			else if(last == 0x000E){
-				if(vx > 7){
-					this.V[15] = 1;
-				}
-				else{
-					this.V[15] = 0;
-				}
-				this.V[x] *= 2;
+			
+			case 0xE:
+			{
+				/*
+				 * Set Vx = Vx SHL 1.
+				 */
+
+				// Set flag register if MSb of Vx is set
+				V[0xF] = (((V[x] & 0x80) >> 7) == 1) ? (byte)1 : 0;
+				
+				V[x] <<= 1;
+				
+				break;
 			}
-			this.PC += 2;
-			break;
+			
+			// End masking
+			}
+			
+		PC += 2;
+		break;
+		}
 		case 0x9000:
 			//Skips
 			if(this.V[x] == this.V[y]){
@@ -366,7 +424,7 @@ public class Chip8 {
 			/**
 			 * BNNN : Instruction pour sauter à l'adresse NNN depuis le registre v0 
 			 */
-			PC = nnn+V[0];
+			PC = (short)(nnn + V[0]);
 			break;
 		case 0xC000:
 			/**
@@ -417,7 +475,7 @@ public class Chip8 {
 			// on récupère le reste de l'instruction
 			if(kk == 0x9E){
 				//On skip si la bonne touche est pressée
-				Thread.yield();
+				//Thread.yield();
 				key = input.getInput();
 				if(V[x]==key){
 					PC+=4;
@@ -426,7 +484,7 @@ public class Chip8 {
 				}
 			}else if(kk == 0xA1){
 				//On skip si la bonne touche n est pas pressée
-				Thread.yield();
+				//Thread.yield();
 				key = input.getInput();
 				if(V[x]!=key){
 					PC+=4;
@@ -447,13 +505,17 @@ public class Chip8 {
 			case 0x0A:
 				//On récupère une valeur d'input et on la stocke dans Vx
 				//Petite boucle pour éviter une boucle infinie qui rend impossible la récuperation de l'input
-				Thread.yield();
-				key = input.getInput();
-				if(key ==-1){
-					PC -= 4;
-				}else{
-					V[x] = key;
-				}
+				//Thread.yield();
+				do {
+					key = input.getInput();
+					try {
+						Thread.sleep(10);
+					} catch(InterruptedException ex) {
+						Thread.currentThread().interrupt();
+					}
+				} while(key == -1);
+
+				V[x] = key;
 				break;
 			case 0x15:
 				// On set le delay_timer à Vx
