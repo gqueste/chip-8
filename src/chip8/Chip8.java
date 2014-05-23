@@ -65,8 +65,8 @@ public class Chip8 {
 		this.random = new Random(567765);
 		this.memory = new byte[4096];
 		loadMemory();
-		// 14 instructions pour 100 ms
-		rate = 14;
+		// 20 instructions pour 100 ms
+		rate = 20;
 		per = 100;
 		allowance = rate;
 		last_checked = System.currentTimeMillis();
