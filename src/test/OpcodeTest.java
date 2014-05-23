@@ -144,13 +144,6 @@ public class OpcodeTest {
 		assertEquals("Vy pas correct", VyTemoin, chip8.getV()[4]);
 		assertEquals("PC pas incrémenté 2 fois", pcTemoin + 4, this.chip8.getPC());
 
-
-		//Test non valide : finit pas par 0
-		pcTemoin = chip8.getPC();
-		chip8.setV(VTemoin);
-		chip8.opcode(0x5334);
-//		assertEquals("Instruction n'a pas été ignorée", pcTemoin, this.chip8.getPC());
-
 		//Test non valide : pas egal
 		VxTemoin = (byte) 0x0001;
 		VyTemoin = (byte) 0x0002;
