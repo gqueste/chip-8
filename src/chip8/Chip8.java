@@ -493,8 +493,10 @@ public class Chip8 {
 				//Thread.yield();
 				key = input.getInput();
 				if(V[x]==key){
+					System.out.println("input attendus effectué EX9E");
 					PC+=4;
 				}else{
+					System.out.println("input attendus non pressé EX9E");
 					PC+=2;
 				}
 			}else if(kk == 0xA1){
@@ -502,8 +504,10 @@ public class Chip8 {
 				//Thread.yield();
 				key = input.getInput();
 				if(V[x]!=key){
+					System.out.println("input attendus non pressé EXA1");
 					PC+=4;
 				}else{
+					System.out.println("input attendus effectué EXA1");
 					PC+=2;
 				}
 			}
@@ -521,15 +525,16 @@ public class Chip8 {
 				//On récupère une valeur d'input et on la stocke dans Vx
 				//Petite boucle pour éviter une boucle infinie qui rend impossible la récuperation de l'input
 				//Thread.yield();
-				do {
+				System.out.println("yop");
+				while(key == -1){
 					key = input.getInput();
 					try {
-						Thread.sleep(10);
+						Thread.sleep(1);
 					} catch(InterruptedException ex) {
 						Thread.currentThread().interrupt();
 					}
-				} while(key == -1);
-
+				}
+				System.out.println("input attendus effectué FX0A");
 				V[x] = key;
 				break;
 			case 0x15:
