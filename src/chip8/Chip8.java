@@ -239,6 +239,30 @@ public class Chip8 {
 					this.PC = this.stack[this.SP];
 					this.PC += 2;
 				}
+				else if (opcode == 0x00C0){
+					//TODO
+					this.PC += 2;
+				}
+				else if (opcode == 0x00FB){
+					//TODO
+					this.PC +=2;
+				}
+				else if (opcode == 0x00FC){
+					//TODO
+					this.PC +=2;
+				}
+				else if (opcode == 0x00FD){
+					//TODO
+					this.PC +=2;
+				}
+				else if (opcode == 0x00FE){
+					//TODO
+					this.PC +=2;
+				}
+				else if (opcode == 0x00FF){
+					//TODO
+					this.PC +=2;
+				}
 			}
 			break;
 
@@ -553,6 +577,9 @@ public class Chip8 {
 				//On set de I avec la position du sprite de l'octet Vx
 				I = (short)(V[x]*5);
 				break;
+			case 0x30:
+				//TODO
+				break;
 			case 0x33:
 				//On stock la représentation BCD du registre vr dans I,I+1,I+2
 				char chaine[] = String.valueOf((int)(V[x] & 0xFF)).toCharArray();
@@ -580,6 +607,12 @@ public class Chip8 {
 				for(int i = 0;i<=x;i++){
 					V[i] = memory[I + i];
 				}
+				break;
+			case 0x75:
+				//TODO
+				break;
+			case 0x85:
+				//TODO
 				break;
 			default:
 				break;

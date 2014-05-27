@@ -23,7 +23,8 @@ public class ToucheListener implements KeyListener {
 	public byte getInput() {
 		// Method pour retourner la valeur de keyHexa
 		// Ne pas oublier de reset la valeur de keyHexa
-		byte valeur = keyHexa;
+		byte valeur = keyHexa; 
+		System.out.println("Pouet");
 		keyHexa = -1;
 		return valeur;
 	}
