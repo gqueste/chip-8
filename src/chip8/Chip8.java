@@ -16,7 +16,7 @@ public class Chip8 {
 	private int PC, delay_timer, sound_timer;
 	private byte SP,key;
 	private short I;
-	private byte[] V, memory,rom;
+	private byte[] V, memory,rom, RPLUserFlag;
 	private byte[][] display;
 	private int[] stack;
 	private Random random;
@@ -25,6 +25,9 @@ public class Chip8 {
 	private double rate, per, allowance;
 	private long current, passed, last_checked;
 	private AudioStream lecteur;
+	private boolean sChipMode = false;
+	private boolean cycle = true;
+	private static Ecran ecranJeu;
 
 	/**
 	 * Constructeur pour les tests où la rom n'est pas nécessaire
@@ -34,6 +37,7 @@ public class Chip8 {
 		this.SP = 0;
 		this.setStack(new int[16]);
 		this.V = new byte[16];
+		this.RPLUserFlag = new byte[16];
 		this.random = new Random(567765);
 		this.memory = new byte[4096];
 		System.out.println("Load");
@@ -82,7 +86,7 @@ public class Chip8 {
 		this.key = -1;
 		loadRom(rom);
 	}
-	
+
 	private void loadSound() {
 		try {
 			this.lecteur=new AudioStream(new FileInputStream("src/tone.wav"));
@@ -216,8 +220,9 @@ public class Chip8 {
 		int nnn = (opcode & 0x0FFF);
 
 		int first = opcode & 0xF000;
+		int last = opcode & 0x000F;
 
-//		System.out.println("Opcode : " +  String.format("0x%4s", Integer.toHexString(opcode)).replace(' ', '0'));
+		//		System.out.println("Opcode : " +  String.format("0x%4s", Integer.toHexString(opcode)).replace(' ', '0'));
 		switch (first) {
 		case 0x0000 :
 			if(x != 0x0000) {
@@ -240,27 +245,30 @@ public class Chip8 {
 					this.PC += 2;
 				}
 				else if (opcode == 0x00C0){
-					//TODO
+					scrollDown(last);
 					this.PC += 2;
 				}
 				else if (opcode == 0x00FB){
-					//TODO
+					if(sChipMode){
+						scrollRight();
+					}
 					this.PC +=2;
 				}
 				else if (opcode == 0x00FC){
-					//TODO
+					if(sChipMode){
+						scrollLeft();
+					}
 					this.PC +=2;
 				}
 				else if (opcode == 0x00FD){
-					//TODO
-					this.PC +=2;
+					this.setCycle(false);
 				}
 				else if (opcode == 0x00FE){
-					//TODO
+					sChipMode=false;
 					this.PC +=2;
 				}
 				else if (opcode == 0x00FF){
-					//TODO
+					sChipMode=true;
 					this.PC +=2;
 				}
 			}
@@ -330,69 +338,69 @@ public class Chip8 {
 
 				break;
 			}
-			
+
 			case 0x1:
 			{
 				// Set Vx = Vx OR Vy.
-				
+
 				V[x] = (byte)(V[x] | V[y]);
-				
+
 				break;
 			}
-			
+
 			case 0x2:
 			{
 				/*
 				 * Set Vx = Vx AND Vy.
 				 */
-				
+
 				V[x] = (byte)(V[x] & V[y]);				
 				break;
 			}
-			
+
 			case 0x3:
 			{
 				/*
 				 * Set Vx = Vx XOR Vy.
 				 */
-				
+
 				V[x] ^= V[y];
-				
+
 				break;
 			}
-			
+
 			case 0x4:
 			{
 				/*
 				 * Set Vx = Vx + Vy, set VF = carry.
 				 */
-				
+
 				V[x] = (byte)(V[x] + V[y]);
-				
+
 				if((V[x] + V[y]) > 255)
 					V[0xF] = 1;
 				else
 					V[0xF] = 0;
-				
+
 				break;
 			}
-			
+
 			case 0x5:
 			{
 				/*
 				 * Set Vx = Vx - Vy, set VF = NOT borrow.
 				 */
-					
+
 				if(V[x] > V[y])
 					V[0xF] = 1;
 				else
 					V[0xF] = 0;
-				
+
 				V[x] = (byte)(V[x] - V[y]);
-				
+
 				break;
 			}
-			
+
 			case 0x6:
 			{
 				/*
@@ -406,25 +414,25 @@ public class Chip8 {
 				else {
 					V[0xF] = 0;
 				}
-				
+
 				V[x] >>= 1;
-				
-				break;
+
+		break;
 			}
-			
+
 			case 0x7:
 			{
 				/*
 				 * Set Vx = Vy - Vx, set VF = NOT borrow.
 				 */
-				
+
 				V[0xF] = (V[y] > V[x]) ? (byte)1 : 0;
-				
+
 				V[x] = (byte)(V[y] - V[x]);
-				
+
 				break;
 			}
-			
+
 			case 0xE:
 			{
 				/*
@@ -433,17 +441,17 @@ public class Chip8 {
 
 				// Set flag register if MSb of Vx is set
 				V[0xF] = (((V[x] & 0x80) >> 7) == 1) ? (byte)1 : 0;
-				
+
 				V[x] <<= 1;
-				
+
 				break;
 			}
-			
+
 			// End masking
 			}
-			
-		PC += 2;
-		break;
+
+			PC += 2;
+			break;
 		}
 		case 0x9000:
 			//Skips
@@ -487,7 +495,7 @@ public class Chip8 {
 			//Boucle d'affichage
 			for(short axeY = 0; axeY < nbByte; axeY++){
 				short pixel = memory[I+axeY];
-//				System.out.println(String.format("pixel : %x, %x", pixel, I+axeY));
+				//				System.out.println(String.format("pixel : %x, %x", pixel, I+axeY));
 				for(short axeX = 0 ; axeX<8 ; axeX++){
 					//On vérifie que le pixel n'est pas hors de "l ecran"
 					if((pixel & (0x80>>axeX)) != 0 ){
@@ -502,8 +510,11 @@ public class Chip8 {
 						}
 						display[xPlace+axeX][yPlace+axeY] ^= 1;
 					}
-//					System.out.println(String.format("pixel : %x, %x", pixel, xPlace+axeX));
+					//					System.out.println(String.format("pixel : %x, %x", pixel, xPlace+axeX));
 				}
+			}
+			if(ecranJeu!=null){
+				ecranJeu.repaint();
 			}
 			PC +=2;
 			break;
@@ -516,19 +527,19 @@ public class Chip8 {
 				//On skip si la bonne touche est pressée
 				//Thread.yield();
 				key = input.getInput();
+				System.out.println(key);
 				if(V[x]==key){
 					System.out.println("input attendus effectué EX9E");
 					PC+=4;
 				}else{
-					System.out.println("input attendus non pressé EX9E");
 					PC+=2;
 				}
 			}else if(kk == 0xA1){
 				//On skip si la bonne touche n est pas pressée
 				//Thread.yield();
 				key = input.getInput();
+				System.out.println(key);
 				if(V[x]!=key){
-					System.out.println("input attendus non pressé EXA1");
 					PC+=4;
 				}else{
 					System.out.println("input attendus effectué EXA1");
@@ -549,7 +560,6 @@ public class Chip8 {
 				//On récupère une valeur d'input et on la stocke dans Vx
 				//Petite boucle pour éviter une boucle infinie qui rend impossible la récuperation de l'input
 				//Thread.yield();
-				System.out.println("yop");
 				while(key == -1){
 					key = input.getInput();
 					try {
@@ -578,7 +588,7 @@ public class Chip8 {
 				I = (short)(V[x]*5);
 				break;
 			case 0x30:
-				//TODO
+				I = (short)(V[x]*10);
 				break;
 			case 0x33:
 				//On stock la représentation BCD du registre vr dans I,I+1,I+2
@@ -609,10 +619,14 @@ public class Chip8 {
 				}
 				break;
 			case 0x75:
-				//TODO
+				for(int i=0 ; i<=x ; i++){
+					RPLUserFlag[i] = V[i];
+				}
 				break;
 			case 0x85:
-				//TODO
+				for(int i=0 ; i<=x ; i++){
+					V[i] = RPLUserFlag[i];
+				}
 				break;
 			default:
 				break;
@@ -622,6 +636,41 @@ public class Chip8 {
 		default:
 			break;
 		}
+	}
+
+	private void scrollLeft() {
+		for(int i=0; i<128; i++)
+		{
+			for(int j=63; j>=0; j--)
+			{
+				if(i>4)
+					display[i][j]=display[i+4][j];
+			}
+		}
+	}
+
+	private void scrollRight() {
+		for(int i=0; i<128; i++)
+		{
+			for(int j=63; j>=0; j--)
+			{
+				if(i>4)
+					display[i][j]=display[i-4][j];
+			}
+		}
+
+	}
+
+	private void scrollDown(int last) {
+		for(int i=0; i<128; i++)
+		{
+			for(int j=63; j>=0; j--)
+			{
+				if(j>=last)
+					display[i][j]=display[i][j-last];
+			}
+		}
+
 	}
 
 	//#############################################################################################
@@ -721,6 +770,102 @@ public class Chip8 {
 
 	public void setInput(ToucheListener input) {
 		this.input = input;
+	}
+
+	public byte[] getRom() {
+		return rom;
+	}
+
+	public void setRom(byte[] rom) {
+		this.rom = rom;
+	}
+
+	public byte[] getRPLUserFlag() {
+		return RPLUserFlag;
+	}
+
+	public void setRPLUserFlag(byte[] rPLUserFlag) {
+		RPLUserFlag = rPLUserFlag;
+	}
+
+	public double getRate() {
+		return rate;
+	}
+
+	public void setRate(double rate) {
+		this.rate = rate;
+	}
+
+	public double getPer() {
+		return per;
+	}
+
+	public void setPer(double per) {
+		this.per = per;
+	}
+
+	public double getAllowance() {
+		return allowance;
+	}
+
+	public void setAllowance(double allowance) {
+		this.allowance = allowance;
+	}
+
+	public long getCurrent() {
+		return current;
+	}
+
+	public void setCurrent(long current) {
+		this.current = current;
+	}
+
+	public long getPassed() {
+		return passed;
+	}
+
+	public void setPassed(long passed) {
+		this.passed = passed;
+	}
+
+	public long getLast_checked() {
+		return last_checked;
+	}
+
+	public void setLast_checked(long last_checked) {
+		this.last_checked = last_checked;
+	}
+
+	public AudioStream getLecteur() {
+		return lecteur;
+	}
+
+	public void setLecteur(AudioStream lecteur) {
+		this.lecteur = lecteur;
+	}
+
+	public boolean issChipMode() {
+		return sChipMode;
+	}
+
+	public void setsChipMode(boolean sChipMode) {
+		this.sChipMode = sChipMode;
+	}
+
+	public boolean isCycle() {
+		return cycle;
+	}
+
+	public void setCycle(boolean cycle) {
+		this.cycle = cycle;
+	}
+
+	public Ecran getEcran() {
+		return ecranJeu;
+	}
+
+	public static void setEcran(Ecran ecran) {
+		ecranJeu = ecran;
 	}
 
 }

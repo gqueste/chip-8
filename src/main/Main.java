@@ -35,14 +35,14 @@ public class Main {
 		Chip8 chip8 = new Chip8(rom, touche);
 
 		Ecran ecran = new Ecran(chip8.getDisplay());
+		Chip8.setEcran(ecran);
 		fenetreJeu.add(ecran);
 		fenetreJeu.addKeyListener(touche);
 		fenetreJeu.setVisible(true);
 
 		do{
 			chip8.lire();
-			fenetreJeu.repaint();
-		}while(true);
+		}while(chip8.isCycle());
 		
 	}
 

@@ -55,6 +55,52 @@ public class OpcodeTest {
 	}
 
 	@Test
+	public void test00CN(){
+		pcTemoin = chip8.getPC();
+		chip8.opcode(0x00CF);
+		assertEquals("PC mal incrémenté",pcTemoin,chip8.getPC());
+	}
+
+	@Test
+	public void test00FB(){
+		pcTemoin = chip8.getPC();
+		chip8.opcode(0x00FB);
+		assertEquals("PC mal incrémenté",pcTemoin+2,chip8.getPC());
+	}
+
+	@Test
+	public void test00FC(){
+		pcTemoin = chip8.getPC();
+		chip8.opcode(0x00FC);
+		assertEquals("PC mal incrémenté",pcTemoin+2,chip8.getPC());
+	}
+
+	@Test
+	public void test00FD(){
+		boolean cycle = chip8.isCycle();
+		chip8.opcode(0x00FD);
+		assertNotEquals("boolean mal modifié",cycle,chip8.isCycle());
+	}
+
+	@Test
+	public void test00FE(){
+		boolean sChipMode = chip8.issChipMode();
+		chip8.opcode(0x00FE);
+		assertEquals("boolean mal modifié",sChipMode,chip8.issChipMode());
+	}
+
+	@Test
+	public void test00FF(){
+		boolean sChipMode = chip8.issChipMode();
+		chip8.opcode(0x00FF);
+		if(sChipMode){
+			assertEquals("boolean mal modifié",sChipMode,chip8.issChipMode());
+		}else{
+			assertNotEquals("boolean mal modifié",sChipMode,chip8.issChipMode());
+		}
+	}
+
+	@Test
 	public void test0NNN_NonValide() {
 		byte SPTemoin = chip8.getSP();
 		pcTemoin = chip8.getPC();
@@ -378,7 +424,7 @@ public class OpcodeTest {
 		}
 		assertEquals("PC mal incrémenté",pcTemoin+2,this.chip8.getPC());
 	}
-	
+
 	@Test
 	public void testEX9E(){
 		byte[] VTemoins = new byte[16];
@@ -391,9 +437,9 @@ public class OpcodeTest {
 		chip8.setKey((byte)0x07);
 		chip8.opcode(0xE79E);
 		assertEquals("PC non incrémenté", pcTemoin+2, this.chip8.getPC());
-		
+
 	}
-	
+
 	@Test
 	public void testEXA1(){
 		byte[] VTemoins = new byte[16];
