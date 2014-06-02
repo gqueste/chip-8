@@ -22,6 +22,7 @@ public class UI {
 	private ToucheListener touche;
 	private Chip8 chip8;
 	private Ecran ecran;
+	private Thread threadJeu;
 
 	public UI() {
 		fenetreJeu = new JFrame();
@@ -31,69 +32,67 @@ public class UI {
 		fenetreJeu.setResizable(true);
 		fenetreJeu.getContentPane().setBackground(Color.BLACK);
 		
+		ecran = new Ecran(null);
+		fenetreJeu.add(ecran);
 		touche = new ToucheListener();
-
+	}
+	
+	/**
+	 * Initialisation de l'interface de l'émulateur
+	 */
+	public void initInterface() {
 		JMenuBar menuBar = new JMenuBar();
 		JMenu menuRom = new JMenu("Rom");
 		menuRom.setMnemonic(KeyEvent.VK_R);
-
 		JMenuItem itemLoadRom = new JMenuItem("Charger Rom", KeyEvent.VK_C);
-		itemLoadRom.setAccelerator(KeyStroke.getKeyStroke(
-				KeyEvent.VK_C, ActionEvent.ALT_MASK));
+		itemLoadRom.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.ALT_MASK));
 		itemLoadRom.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
 				File romObtenue = selectRom();
 				if(romObtenue != null) {
 					chip8.setCycle(false);
-					changeRom(romObtenue);
+					threadJeu.interrupt();
+					chargeRom(romObtenue);
 				}
 			}
 		});
-
 
 		menuRom.add(itemLoadRom);
 		menuBar.add(menuRom);
 		fenetreJeu.setJMenuBar(menuBar);
 
-
+		//Empêche de lancer l'émulateur sans une rom validée
 		do {
 			rom = this.selectRom();
 		}while (this.getRom() == null);
-
-
-		chip8 = new Chip8(rom, touche);
-		ecran = new Ecran(chip8.getDisplay());
-		chip8.setEcran(ecran);
-		fenetreJeu.add(ecran);
-		fenetreJeu.addKeyListener(touche);
-		fenetreJeu.setVisible(true);
-
-		do{
-			chip8.lire();
-			System.out.println("continue");
-		}while(chip8.isCycle());
+		
+		//Charge la rom validée
+		this.chargeRom(rom);		
 	}
 
 	/**
-	 * 
-	 * @param romLancee, nouvelleRom mise
+	 * Méthode appelée en cas de changement de rom par l'utilisateur
+	 * @param romLancee, File, nouvelleRom sélectionnée
 	 */
-	public void changeRom(File romLancee) {
-		
+	public void chargeRom(File romLancee) {
 		fenetreJeu.remove(ecran);
-		Chip8 chip82 = new Chip8(romLancee, touche);
-		Ecran ecran2 = new Ecran(chip82.getDisplay());
-		chip82.setEcran(ecran2);
-		fenetreJeu.add(ecran2);
+		chip8 = new Chip8(romLancee, touche);
+		ecran = new Ecran(chip8.getDisplay());
+		chip8.setEcran(ecran);
+		fenetreJeu.add(ecran);
 		fenetreJeu.revalidate();
 		fenetreJeu.repaint();
-		
-		//TODO : freeze ici. rom tourne bien, mais freeze de toute la fenêtre
-		//I don't know why
-		
-		do{
-			chip82.lire();
-		}while(chip82.isCycle());
+		fenetreJeu.addKeyListener(touche);
+		fenetreJeu.setVisible(true);
+				
+		threadJeu = new Thread() {
+	        public void run() {
+	        	do{
+	    			chip8.lire();
+	    		}while(chip8.isCycle());
+	        }
+	    };
+	    threadJeu.start();
 	}
 
 	private File selectRom(){
@@ -104,6 +103,10 @@ public class UI {
 		return ret;
 	}
 
+	/**
+	 * Retourne la rom utilisée par l'émulateur
+	 * @return File la rom courante
+	 */
 	public File getRom() {
 		return this.rom;
 	}
