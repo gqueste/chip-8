@@ -33,8 +33,8 @@ public class Main {
 		File rom = chooser.getSelectedFile();
 		ToucheListener touche = new ToucheListener();
 		Chip8 chip8 = new Chip8(rom, touche);
-
-		Ecran ecran = new Ecran(chip8.getDisplay());
+		chip8.lirePremierOpcode();
+		Ecran ecran = new Ecran(chip8.getDisplay(),chip8.getNbPixelsAxeXChip8(), chip8.getNbPixelsAxeYChip8());
 		Chip8.setEcran(ecran);
 		fenetreJeu.add(ecran);
 		fenetreJeu.addKeyListener(touche);

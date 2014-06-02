@@ -29,6 +29,9 @@ public class Chip8 {
 	private boolean cycle = true;
 	private static Ecran ecranJeu;
 
+	private int nbPixelsAxeYChip8 = 32;
+	private int nbPixelsAxeXChip8 = 64;
+
 	/**
 	 * Constructeur pour les tests où la rom n'est pas nécessaire
 	 */
@@ -47,9 +50,9 @@ public class Chip8 {
 		allowance = rate;
 		last_checked = System.currentTimeMillis();
 
-		display = new byte[64][32];
-		for(int i=0;i<64;i++){
-			for(int j=0;j<32;j++){
+		display = new byte[nbPixelsAxeXChip8][nbPixelsAxeXChip8];
+		for(int i=0;i<nbPixelsAxeXChip8;i++){
+			for(int j=0;j<nbPixelsAxeYChip8;j++){
 				this.display[i][j] = 0;
 			}
 		}
@@ -75,7 +78,7 @@ public class Chip8 {
 		allowance = rate;
 		last_checked = System.currentTimeMillis();
 
-		display = new byte[64][32];
+		display = new byte[nbPixelsAxeXChip8][nbPixelsAxeXChip8];
 		for(int i=0;i<64;i++){
 			for(int j=0;j<32;j++){
 				this.display[i][j] = 0;
@@ -84,7 +87,9 @@ public class Chip8 {
 
 		this.input = touche;
 		this.key = -1;
+		System.out.println("loadRom");
 		loadRom(rom);
+		System.out.println("lu");
 	}
 
 	private void loadSound() {
@@ -116,6 +121,7 @@ public class Chip8 {
 			stream.read(this.rom,0,taille);
 			System.arraycopy(this.rom, 0, this.getMemory(), 0x200, taille);
 			stream.close();
+			this.lire();
 		}catch (Exception e){
 			e.printStackTrace();
 		}
@@ -269,6 +275,17 @@ public class Chip8 {
 				}
 				else if (opcode == 0x00FF){
 					sChipMode=true;
+					if(issChipMode()){
+						System.out.println("SCmode");
+						nbPixelsAxeXChip8 = 128;
+						nbPixelsAxeYChip8 = 64;
+						display = new byte[nbPixelsAxeXChip8][nbPixelsAxeYChip8];
+						for(int i=0;i<nbPixelsAxeXChip8;i++){
+							for(int j=0;j<nbPixelsAxeYChip8;j++){
+								this.display[i][j] = 0;
+							}
+						}
+					}
 					this.PC +=2;
 				}
 			}
@@ -417,7 +434,7 @@ public class Chip8 {
 
 				V[x] >>= 1;
 
-		break;
+						break;
 			}
 
 			case 0x7:
@@ -484,6 +501,7 @@ public class Chip8 {
 			/**
 			 * DXYN : Affichage des sprites
 			 */
+			System.out.println("Affichage");
 			// Nombre de Byte verticaux
 			int nbByte = (opcode & 0xF);
 			// Flag de collision
@@ -493,26 +511,32 @@ public class Chip8 {
 			int yPlace = (V[y]&0xFF);
 
 			//Boucle d'affichage
-			for(short axeY = 0; axeY < nbByte; axeY++){
-				short pixel = memory[I+axeY];
-				//				System.out.println(String.format("pixel : %x, %x", pixel, I+axeY));
-				for(short axeX = 0 ; axeX<8 ; axeX++){
-					//On vérifie que le pixel n'est pas hors de "l ecran"
-					if((pixel & (0x80>>axeX)) != 0 ){
-						if((xPlace + axeX)>63){
-							continue;
-						}
-						if((yPlace + axeY)>31){
-							continue;
-						}
-						if(display[xPlace+axeX][yPlace+axeY] == 1){
-							V[0xF] = 1;
-						}
-						display[xPlace+axeX][yPlace+axeY] ^= 1;
-					}
-					//					System.out.println(String.format("pixel : %x, %x", pixel, xPlace+axeX));
-				}
+			int valeurX = 0;
+			if(!sChipMode){
+				valeurX = 8;
+			}else{
+				valeurX = 16;
 			}
+				for(short axeY = 0; axeY < nbByte; axeY++){
+					short pixel = memory[I+axeY];
+					//				System.out.println(String.format("pixel : %x, %x", pixel, I+axeY));
+					for(short axeX = 0 ; axeX<valeurX ; axeX++){
+						//On vérifie que le pixel n'est pas hors de "l ecran"
+						if((pixel & (0x80>>axeX)) != 0 ){
+							if((xPlace + axeX)>nbPixelsAxeXChip8-1){
+								continue;
+							}
+							if((yPlace + axeY)>nbPixelsAxeYChip8-1){
+								continue;
+							}
+							if(display[xPlace+axeX][yPlace+axeY] == 1){
+								V[0xF] = 1;
+							}
+							display[xPlace+axeX][yPlace+axeY] ^= 1;
+						}
+						//					System.out.println(String.format("pixel : %x, %x", pixel, xPlace+axeX));
+					}
+				}
 			if(ecranJeu!=null){
 				ecranJeu.repaint();
 			}
@@ -527,7 +551,6 @@ public class Chip8 {
 				//On skip si la bonne touche est pressée
 				//Thread.yield();
 				key = input.getInput();
-				System.out.println(key);
 				if(V[x]==key){
 					System.out.println("input attendus effectué EX9E");
 					PC+=4;
@@ -535,10 +558,10 @@ public class Chip8 {
 					PC+=2;
 				}
 			}else if(kk == 0xA1){
+				//FIXME problème de latence
 				//On skip si la bonne touche n est pas pressée
 				//Thread.yield();
 				key = input.getInput();
-				System.out.println(key);
 				if(V[x]!=key){
 					PC+=4;
 				}else{
@@ -643,8 +666,8 @@ public class Chip8 {
 		{
 			for(int j=63; j>=0; j--)
 			{
-				if(i>4)
-					display[i][j]=display[i+4][j];
+				if(j<60)
+					display[i][j]=display[i][j+4];
 			}
 		}
 	}
@@ -654,8 +677,8 @@ public class Chip8 {
 		{
 			for(int j=63; j>=0; j--)
 			{
-				if(i>4)
-					display[i][j]=display[i-4][j];
+				if(j>4)
+					display[i][j]=display[i][j-4];
 			}
 		}
 
@@ -667,10 +690,14 @@ public class Chip8 {
 			for(int j=63; j>=0; j--)
 			{
 				if(j>=last)
-					display[i][j]=display[i][j-last];
+					display[i][j]=display[i-last][j];
 			}
 		}
 
+	}
+
+	public void lirePremierOpcode(){
+		this.lire();
 	}
 
 	//#############################################################################################
@@ -866,6 +893,30 @@ public class Chip8 {
 
 	public static void setEcran(Ecran ecran) {
 		ecranJeu = ecran;
+	}
+
+	public static Ecran getEcranJeu() {
+		return ecranJeu;
+	}
+
+	public static void setEcranJeu(Ecran ecranJeu) {
+		Chip8.ecranJeu = ecranJeu;
+	}
+
+	public int getNbPixelsAxeYChip8() {
+		return nbPixelsAxeYChip8;
+	}
+
+	public void setNbPixelsAxeYChip8(int nbPixelsAxeYChip8) {
+		this.nbPixelsAxeYChip8 = nbPixelsAxeYChip8;
+	}
+
+	public int getNbPixelsAxeXChip8() {
+		return nbPixelsAxeXChip8;
+	}
+
+	public void setNbPixelsAxeXChip8(int nbPixelsAxeXChip8) {
+		this.nbPixelsAxeXChip8 = nbPixelsAxeXChip8;
 	}
 
 }
