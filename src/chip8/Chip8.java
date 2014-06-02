@@ -27,7 +27,7 @@ public class Chip8 {
 	private AudioStream lecteur;
 	private boolean sChipMode = false;
 	private boolean cycle = true;
-	private static Ecran ecranJeu;
+	private Ecran ecranJeu;
 
 	/**
 	 * Constructeur pour les tests où la rom n'est pas nécessaire
@@ -864,7 +864,7 @@ public class Chip8 {
 		return ecranJeu;
 	}
 
-	public static void setEcran(Ecran ecran) {
+	public void setEcran(Ecran ecran) {
 		ecranJeu = ecran;
 	}
 
