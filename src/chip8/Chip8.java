@@ -27,7 +27,7 @@ public class Chip8 {
 	private AudioStream lecteur;
 	private boolean sChipMode = false;
 	private boolean cycle = true;
-	private static Ecran ecranJeu;
+	private Ecran ecranJeu;
 
 	private int nbPixelsAxeYChip8 = 32;
 	private int nbPixelsAxeXChip8 = 64;
@@ -891,16 +891,16 @@ public class Chip8 {
 		return ecranJeu;
 	}
 
-	public static void setEcran(Ecran ecran) {
+	public void setEcran(Ecran ecran) {
 		ecranJeu = ecran;
 	}
 
-	public static Ecran getEcranJeu() {
+	public Ecran getEcranJeu() {
 		return ecranJeu;
 	}
 
-	public static void setEcranJeu(Ecran ecranJeu) {
-		Chip8.ecranJeu = ecranJeu;
+	public void setEcranJeu(Ecran ecranJeu) {
+		this.ecranJeu = ecranJeu;
 	}
 
 	public int getNbPixelsAxeYChip8() {
