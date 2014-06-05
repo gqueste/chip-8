@@ -4,15 +4,22 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 
+import javax.swing.ButtonGroup;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 
 public class UI {
 
@@ -23,6 +30,10 @@ public class UI {
 	private Chip8 chip8;
 	private Ecran ecran;
 	private Thread threadJeu;
+	private JRadioButtonMenuItem rbVitesse1;
+	private JRadioButtonMenuItem rbVitesse2;
+	private JRadioButtonMenuItem rbVitesse3;
+	private JRadioButtonMenuItem rbVitesse4;
 
 	public UI() {
 		fenetreJeu = new JFrame();
@@ -58,7 +69,82 @@ public class UI {
 		});
 
 		menuRom.add(itemLoadRom);
+		
+		
+		JMenu menuVitesse = new JMenu("Vitesse");
+		menuVitesse.setMnemonic(KeyEvent.VK_V);
+		ButtonGroup groupVitesseButtons = new ButtonGroup();
+		rbVitesse1 = new JRadioButtonMenuItem("Vitesse / 2");
+		rbVitesse1.addItemListener(new ItemListener() {
+			
+			@Override
+			public void itemStateChanged(ItemEvent arg0) {
+				chip8.setRate(Chip8.DEFAULT_INSTRUCTIONS_RATE / 2);
+			}
+		});
+		
+		rbVitesse2 = new JRadioButtonMenuItem("Vitesse Normale");
+		rbVitesse2.setSelected(true);
+		rbVitesse2.addItemListener(new ItemListener() {
+			
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				chip8.setRate(Chip8.DEFAULT_INSTRUCTIONS_RATE);
+			}
+		});
+		
+		rbVitesse3 = new JRadioButtonMenuItem("Vitesse x 2");
+		rbVitesse3.addItemListener(new ItemListener() {
+			
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				chip8.setRate(Chip8.DEFAULT_INSTRUCTIONS_RATE * 2);
+			}
+		});
+		
+		rbVitesse4 = new JRadioButtonMenuItem("Vitesse x 4");
+		rbVitesse4.addItemListener(new ItemListener() {
+			
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				chip8.setRate(Chip8.DEFAULT_INSTRUCTIONS_RATE * 4);
+			}
+		});
+		groupVitesseButtons.add(rbVitesse1);
+		groupVitesseButtons.add(rbVitesse2);
+		groupVitesseButtons.add(rbVitesse3);
+		groupVitesseButtons.add(rbVitesse4);
+
+		menuVitesse.add(rbVitesse1);
+		menuVitesse.add(rbVitesse2);
+		menuVitesse.add(rbVitesse3);
+		menuVitesse.add(rbVitesse4);
+		
+		JMenu menuAbout = new JMenu("A propos");
+		menuAbout.addMenuListener(new MenuListener() {
+			
+			@Override
+			public void menuSelected(MenuEvent arg0) {
+				JOptionPane.showMessageDialog(fenetreJeu, "Projet réalisé par : \n"
+						+ "Gwénaël PROVOST\n"
+						+ "Gabriel QUESTE\n"
+						+ "Quentin VICTOOR\n"
+						+ "Promotion 2016"
+						+ "dans le cadre du module SCRUM de la Formation Ingénierie Logicielle"
+						+ "de l'Ecole des Mines de Nantes\n"
+						+ "Superviseur : Florent Marchand de Kerchove");
+			}
+			
+			@Override
+			public void menuDeselected(MenuEvent arg0) {}
+			
+			@Override
+			public void menuCanceled(MenuEvent arg0) {}
+		});
+		
 		menuBar.add(menuRom);
+		menuBar.add(menuVitesse);
+		menuBar.add(menuAbout);
 		fenetreJeu.setJMenuBar(menuBar);
 
 		//Empêche de lancer l'émulateur sans une rom validée
@@ -85,6 +171,7 @@ public class UI {
 		fenetreJeu.repaint();
 		fenetreJeu.addKeyListener(touche);
 		fenetreJeu.setVisible(true);
+		rbVitesse2.setSelected(true);
 				
 		threadJeu = new Thread() {
 	        public void run() {

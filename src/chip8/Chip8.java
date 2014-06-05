@@ -12,6 +12,8 @@ import sun.audio.AudioStream;
 public class Chip8 {
 
 	//private final int LIMIT_NUMBER-INSTRUCTION;
+	
+	public final static double DEFAULT_INSTRUCTIONS_RATE = 20;
 
 	private int PC, delay_timer, sound_timer;
 	private byte SP,key;
@@ -45,7 +47,7 @@ public class Chip8 {
 		this.memory = new byte[4096];
 		System.out.println("Load");
 		// 14 instructions pour 100 ms
-		rate = 14;
+		this.setRate(14);
 		per = 100;
 		allowance = rate;
 		last_checked = System.currentTimeMillis();
@@ -73,7 +75,7 @@ public class Chip8 {
 		this.memory = new byte[4096];
 		loadMemory();
 		// 20 instructions pour 100 ms
-		rate = 20;
+		this.setRate(DEFAULT_INSTRUCTIONS_RATE);
 		per = 100;
 		allowance = rate;
 		last_checked = System.currentTimeMillis();
