@@ -96,4 +96,9 @@ public class ToucheListener implements KeyListener {
 	public void keyTyped(KeyEvent e) {
 	}
 
+	private int renvoie(int i) {
+		return i;
+		
+	}
+
 }
