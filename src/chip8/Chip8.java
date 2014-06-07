@@ -224,8 +224,8 @@ public class Chip8 {
 
 		int x = ((opcode & 0x0F00) >> 8);
 		int y = ((opcode & 0x00F0) >> 4);
-		int kk = (opcode & 0x00FF);
-		int nnn = (opcode & 0x0FFF);
+		int kk = (opcode & 0xFF);
+		int nnn = (opcode & 0xFFF);
 
 		int first = opcode & 0xF000;
 		int last = opcode & 0x000F;
@@ -505,7 +505,7 @@ public class Chip8 {
 			 */
 			System.out.println("Affichage");
 			// Nombre de Byte verticaux
-			int nbByte = (opcode & 0xF);
+			int nbByte = (opcode & 0x000F);
 			// Flag de collision
 			V[0xF] = 0;
 			//place de X et Y 
@@ -524,11 +524,11 @@ public class Chip8 {
 					//				System.out.println(String.format("pixel : %x, %x", pixel, I+axeY));
 					for(short axeX = 0 ; axeX<valeurX ; axeX++){
 						//On vérifie que le pixel n'est pas hors de "l ecran"
-						if((pixel & (0x80>>axeX)) != 0 ){
-							if((xPlace + axeX)>nbPixelsAxeXChip8-1){
+						if((pixel & (0x80>>axeX)) > 0 ){
+							if((xPlace + axeX)>nbPixelsAxeXChip8){
 								continue;
 							}
-							if((yPlace + axeY)>nbPixelsAxeYChip8-1){
+							if((yPlace + axeY)>nbPixelsAxeYChip8){
 								continue;
 							}
 							if(display[xPlace+axeX][yPlace+axeY] == 1){
@@ -616,23 +616,15 @@ public class Chip8 {
 				I = (short)(V[x]*10);
 				break;
 			case 0x33:
-				//On stock la représentation BCD du registre vr dans I,I+1,I+2
-				char chaine[] = String.valueOf((int)(V[x] & 0xFF)).toCharArray();
-				char BCD[]={0,0,0};
-				for(int place=0,count=2;place<chaine.length;place++,count--){
-					BCD[count]=chaine[place];
-				}
-				for(int i=0;i<3;i++){
-					if(BCD[i] == 0)
-					{
-						memory[I + i] = 0;
-					}
-					else
-					{
-						memory[I + i] =	(byte)Character.getNumericValue(BCD[i]);
-					}
-				}
-				break;
+				//On stock la repr�sentation BCD du registre vr dans I,I+1,I+2
+				byte number = this.V[x];
+
+                for (int i = 3; i > 0; i--) {
+                    this.memory[this.I + i - 1] = (byte) (number % 10);
+                    number /= 10;
+                }
+                
+                break;
 			case 0x55:
 				for(int i = 0; i <= x; i++)
 					memory[I + i] = V[i];

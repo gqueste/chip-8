@@ -33,7 +33,7 @@ public class ToucheListener implements KeyListener {
 		//Switch pour récupérer l'input
 				// on fait un lowercase comme a pas besoin de gérer la casse
 				int keyCode = e.getKeyCode();
-				System.out.println("Touche appuyée : "+keyCode);
+				System.out.println("Touche appuy�e : "+keyCode);
 				switch(e.getKeyCode()) {
 				case KeyEvent.VK_1:
 					keyHexa = 0x01;
