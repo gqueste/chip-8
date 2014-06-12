@@ -18,7 +18,8 @@ public class Chip8 {
 	private int PC, delay_timer, sound_timer;
 	private byte SP;
 	private int I;
-	private byte[] V, memory,rom, RPLUserFlag;
+	private int[] V;
+	private byte[] memory,rom, RPLUserFlag;
 	private byte[][] display;
 	private int[] stack;
 	private Random random;
@@ -42,7 +43,7 @@ public class Chip8 {
 		this.PC = 0;
 		this.SP = 0;
 		this.setStack(new int[16]);
-		this.V = new byte[16];
+		this.V = new int[16];
 		this.RPLUserFlag = new byte[16];
 		this.random = new Random(567765);
 		this.memory = new byte[4096];
@@ -70,7 +71,7 @@ public class Chip8 {
 		this.PC = 0;
 		this.SP = 0;
 		this.stack = new int[16];
-		this.V = new byte[16];
+		this.V = new int[16];
 		this.random = new Random(567765);
 		this.memory = new byte[4096];
 		this.keys = new int[16];
@@ -354,7 +355,7 @@ public class Chip8 {
 			{
 				// Set Vx = Vx OR Vy.
 
-				V[opcodeNibble[1]] = (byte)(V[opcodeNibble[1]] | V[opcodeNibble[2]]);
+				V[opcodeNibble[1]] = (V[opcodeNibble[1]] | V[opcodeNibble[2]]);
 
 				break;
 			}
@@ -365,7 +366,7 @@ public class Chip8 {
 				 * Set Vx = Vx AND Vy.
 				 */
 
-				V[opcodeNibble[1]] = (byte)(V[opcodeNibble[1]] & V[opcodeNibble[2]]);				
+				V[opcodeNibble[1]] = (V[opcodeNibble[1]] & V[opcodeNibble[2]]);				
 				break;
 			}
 
@@ -384,16 +385,12 @@ public class Chip8 {
 				/*
 				 * Set Vx = Vx + Vy, set VF = carry.
 				 */
-				System.out.println(V[opcodeNibble[1]]);
-				System.out.println(V[opcodeNibble[2]]);
-				System.out.println((V[opcodeNibble[1]] + V[opcodeNibble[2]]));
 				if((V[opcodeNibble[1]] ) > (0xFF - V[opcodeNibble[2]])){
 					V[0xF] = 1;
-					System.out.println("Bla");
 				}
 				else
 					V[0xF] = 0;
-				V[opcodeNibble[1]] = (byte)(V[opcodeNibble[1]] + V[opcodeNibble[2]]);
+				V[opcodeNibble[1]] = (V[opcodeNibble[1]] + V[opcodeNibble[2]]);
 				break;
 			}
 
@@ -408,7 +405,7 @@ public class Chip8 {
 				else
 					V[0xF] = 0;
 
-				V[opcodeNibble[1]] = (byte)(V[opcodeNibble[1]] - V[opcodeNibble[2]]);
+				V[opcodeNibble[1]] = (V[opcodeNibble[1]] - V[opcodeNibble[2]]);
 
 				break;
 			}
@@ -419,8 +416,8 @@ public class Chip8 {
 				 * Set Vx = Vx SHR 1.
 				 */
 				int temp = V[opcodeNibble[1]] & 1;
-				V[opcodeNibble[1]] = (byte) (V[opcodeNibble[1]] / 2);
-				V[0xF] = (byte) temp;
+				V[opcodeNibble[1]] = (V[opcodeNibble[1]] / 2);
+				V[0xF] = temp;
 				break;
 			}
 
@@ -430,8 +427,8 @@ public class Chip8 {
 				 * Set Vx = Vy - Vx, set VF = NOT borrow.
 				 */
 
-				V[0xF] = (V[opcodeNibble[1]] <= V[opcodeNibble[2]]) ? (byte)1 : 0;
-				V[opcodeNibble[1]] = (byte)(V[opcodeNibble[2]] - V[opcodeNibble[1]]);
+				V[0xF] = (V[opcodeNibble[1]] <= V[opcodeNibble[2]]) ? 1 : 0;
+				V[opcodeNibble[1]] = (V[opcodeNibble[2]] - V[opcodeNibble[1]]);
 
 				break;
 			}
@@ -443,8 +440,8 @@ public class Chip8 {
 				 */
 
 				// Set flag register if MSb of Vx is set
-				V[0xF] = (((V[opcodeNibble[1]] & 0x80) >> 7) == 1) ? (byte)1 : 0;
-				V[opcodeNibble[1]] <<= 1;
+				V[0xF] = (((V[opcodeNibble[1]] & 0x80) >> 7) == 1) ? 1 : 0;
+				V[opcodeNibble[1]] = V[opcodeNibble[1]] * 2;
 				break;
 			}
 
@@ -576,7 +573,7 @@ public class Chip8 {
 				break;
 			case 0x33:
 				//On stock la représentation BCD du registre vr dans I,I+1,I+2
-				byte number = this.V[opcodeNibble[1]];
+				int number = this.V[opcodeNibble[1]];
 				for (int i = 3; i > 0; i--) {
 					this.memory[this.I + i - 1] = (byte) (number % 10);
 					number /= 10;
@@ -585,7 +582,7 @@ public class Chip8 {
 				break;
 			case 0x55:
 				for(int i = 0; i <= opcodeNibble[1]; i++){
-					memory[I + i] = V[i];
+					memory[I + i] = (byte)V[i];
 				}
 				PC +=2;
 				break;
@@ -598,7 +595,7 @@ public class Chip8 {
 			case 0x75:
 				int temp = (opcodeNibble[1] < 8 ? opcodeNibble[1] : 7);
 				for(int i=0 ; i<=temp ; i++){
-					RPLUserFlag[i] = V[i];
+					RPLUserFlag[i] = (byte) V[i];
 				}
 				PC +=2;
 				break;
@@ -766,11 +763,11 @@ public class Chip8 {
 		I = i;
 	}
 
-	public byte[] getV() {
+	public int[] getV() {
 		return V;
 	}
 
-	public void setV(byte[] v) {
+	public void setV(int[] v) {
 		V = v;
 	}
 
