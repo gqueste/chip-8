@@ -31,7 +31,6 @@ public class UI {
 	private Ecran ecran;
 	private Thread threadJeu;
 	private JMenu menuVitesse;
-	private ToucheListener touche;
 	private JRadioButtonMenuItem rbVitesse1;
 	private JRadioButtonMenuItem rbVitesse2;
 	private JRadioButtonMenuItem rbVitesse3;
@@ -47,7 +46,6 @@ public class UI {
 		this.rom = null;
 		
 		ecran = new Ecran(null,128,64);
-		touche = new ToucheListener();
 	}
 	
 	/**
@@ -188,13 +186,13 @@ public class UI {
 			
 			@Override
 			public void keyReleased(KeyEvent e) {
-				chip8.setKey(translateKey(e.getKeyCode())-1,false);
+				chip8.setKey(translateKey(e.getKeyCode()),false);
 				
 			}
 			
 			@Override
 			public void keyPressed(KeyEvent e) {
-				chip8.setKey(translateKey(e.getKeyCode())-1,true);
+				chip8.setKey(translateKey(e.getKeyCode()),true);
 			}
 		});
 		fenetreJeu.setVisible(true);
@@ -229,37 +227,37 @@ public class UI {
 	static int translateKey(int key) {
         switch (key) {
         case KeyEvent.VK_1:
-			return 1;
+			return 0x01;
 		case KeyEvent.VK_2:
-			return 2;
+			return 0x02;
 		case KeyEvent.VK_3:
-			return 3;
+			return 0x03;
 		case KeyEvent.VK_4:
-			return 4;
+			return 0x0C;
 		case KeyEvent.VK_A:
-			return 5;
+			return 0x04;
 		case KeyEvent.VK_Z:
-			return 6;
+			return 0x05;
 		case KeyEvent.VK_E:
-			return 7;
+			return 0x06;
 		case KeyEvent.VK_R:
-			return 8;
+			return 0x0D;
 		case KeyEvent.VK_Q:
-			return 9;
+			return 0x07;
 		case KeyEvent.VK_S:
-			return 10;
+			return 0x08;
 		case KeyEvent.VK_D:
-			return 11;
+			return 0x09;
 		case KeyEvent.VK_F:
-			return 12;
+			return 0x0E;
 		case KeyEvent.VK_W:
-			return 13;
+			return 0x0A;
 		case KeyEvent.VK_X:
-			return 14;
+			return 0x00;
 		case KeyEvent.VK_C:
-			return 15;
+			return 0x0B;
 		case KeyEvent.VK_V:
-			return 16;
+			return 0x0F;
         }
         
         return -1;

@@ -32,8 +32,8 @@ public class Chip8 {
 
 	private int[] keys;
 
-	private int nbPixelsAxeYChip8 = 32;
 	private int nbPixelsAxeXChip8 = 64;
+	private int nbPixelsAxeYChip8 = 32;
 
 	/**
 	 * Constructeur pour les tests où la rom n'est pas nécessaire
@@ -80,17 +80,8 @@ public class Chip8 {
 		per = 100;
 		allowance = rate;
 		last_checked = System.currentTimeMillis();
-
-		display = new byte[nbPixelsAxeXChip8][nbPixelsAxeYChip8];
-		for(int i=0;i<64;i++){
-			for(int j=0;j<32;j++){
-				this.display[i][j] = 0;
-			}
-		}
-
-		System.out.println("loadRom");
+		display = new byte[nbPixelsAxeYChip8][nbPixelsAxeXChip8];
 		loadRom(rom);
-		System.out.println("lu");
 	}
 
 	private void loadSound() {
@@ -198,11 +189,9 @@ public class Chip8 {
 		int msb, lsb, total;
 
 		msb = ((memory[PC]));
-		System.out.println("msb = " + msb);
 		lsb = ((memory[PC + 1]) & 0xFF);
 		total = ((msb << 8) | lsb);
 		int opcodeRecupere = total;
-		System.out.println("Opcode recupere : " + String.format("%02X", opcodeRecupere));
 		opcode(opcodeRecupere);
 
 		if(delay_timer > 0){
@@ -227,13 +216,9 @@ public class Chip8 {
 		opcodeNibble[1] = ((opcode & 0x0F00) >> 8);
 		opcodeNibble[2] = ((opcode & 0x00F0) >> 4);
 		opcodeNibble[3] = ((opcode & 0x000F) >> 0);
-		System.out.println("Opcode : " +  String.format("0x%4s", Integer.toHexString(opcode)).replace(' ', '0'));
 		switch (opcodeNibble[0]) {
 		case 0x0 :
-			if(opcodeNibble[1] != 0x0) {
-				System.out.println("Opcode non reconnu : " + String.format("%04X", opcode));
-			}
-			else {
+			if(opcodeNibble[1] == 0x0) {
 				if(opcode == 0x00E0) {
 					//clear the screen
 					for(int i=0;i<64;i++){
@@ -252,21 +237,27 @@ public class Chip8 {
 				else if (opcodeNibble[2]==0xc){
 					if(sChipMode){
 						scrollDown(opcodeNibble[3]);
-						ecranJeu.repaint();
+						if(ecranJeu!=null){
+							ecranJeu.repaint();
+						}
 					}
 					this.PC += 2;
 				}
 				else if (opcode == 0x00FB){
 					if(sChipMode){
 						scrollRight();
-						ecranJeu.repaint();
+						if(ecranJeu!=null){
+							ecranJeu.repaint();
+						}
 					}
 					this.PC +=2;
 				}
 				else if (opcode == 0x00FC){
 					if(sChipMode){
 						scrollLeft();
-						ecranJeu.repaint();
+						if(ecranJeu!=null){
+							ecranJeu.repaint();
+						}
 					}
 					this.PC +=2;
 				}
@@ -278,7 +269,7 @@ public class Chip8 {
 					if(!issChipMode()){
 						nbPixelsAxeXChip8 = 64;
 						nbPixelsAxeYChip8 = 32;
-						display = new byte[nbPixelsAxeXChip8][nbPixelsAxeYChip8];
+						display = new byte[nbPixelsAxeYChip8][nbPixelsAxeXChip8];
 					}
 					this.PC +=2;
 				}
@@ -287,7 +278,7 @@ public class Chip8 {
 					if(issChipMode()){
 						nbPixelsAxeXChip8 = 128;
 						nbPixelsAxeYChip8 = 64;
-						display = new byte[nbPixelsAxeXChip8][nbPixelsAxeYChip8];
+						display = new byte[nbPixelsAxeYChip8][nbPixelsAxeXChip8];
 					}
 					this.PC +=2;
 				}
@@ -429,17 +420,6 @@ public class Chip8 {
 				int temp = V[opcodeNibble[2]] <= V[opcodeNibble[1]]? 0x01 : 0x00;
 				V[opcodeNibble[1]] = (byte) (V[opcodeNibble[1]] - V[opcodeNibble[2]]);
 				V[0xF] = (byte) temp;
-				//                setPC(PC+2);
-
-				// Set carry flag if LSb of Vx is set
-				//				if((V[opcodeNibble[1]] & 0x1) == 1) {
-				//					V[0xF] = 1;
-				//				}
-				//				else {
-				//					V[0xF] = 0;
-				//				}
-				//
-				//				V[x] >>= 1;
 
 				break;
 			}
@@ -451,7 +431,6 @@ public class Chip8 {
 				 */
 
 				V[0xF] = (V[opcodeNibble[1]] <= V[opcodeNibble[2]]) ? (byte)1 : 0;
-
 				V[opcodeNibble[1]] = (byte)(V[opcodeNibble[2]] - V[opcodeNibble[1]]);
 
 				break;
@@ -488,9 +467,7 @@ public class Chip8 {
 			break;
 		case 0xA:
 			//Set I
-			System.out.println(opcode&0x0FFF);
 			setRegI(opcode&0x0FFF);
-			System.out.println("AXXX : "+I);
 			this.PC += 2;
 			break;
 		case 0xB:
@@ -511,136 +488,15 @@ public class Chip8 {
 			 * DXYN : Affichage des sprites
 			 */
 			V[0xF] = 0;
-			System.out.println("DXYN I : "+I);
+			int x = V[opcodeNibble[1]]&0xFF;
+			int y = V[opcodeNibble[2]]&0xFF;
+			int last = opcodeNibble[3];
 			if(issChipMode()) {
-				int x = V[opcodeNibble[1]]&0xFF;
-				int y = V[opcodeNibble[2]]&0xFF;
-				int last = opcodeNibble[3];
-				if(last == 0){
-					last = 16;
-					for (int axeY = 0 ; axeY < last ; axeY++){
-						int pixel1 = memory[I+axeY*2];
-						int pixel2 = memory[I+axeY*2+1];
+				dessinExtended(x,y,last);
 
-						for(short axeX = 0 ; axeX<8 ; axeX++){
-							//On vérifie que le pixel n'est pas hors de "l ecran"
-							if((pixel1 & (0x80>>>axeX)) > 0 ){
-								if((x + axeX)>=nbPixelsAxeXChip8){
-									continue;
-								}
-								if((y + axeY)>=nbPixelsAxeYChip8){
-									continue;
-								}
-								if(display[x+axeX][y+axeY] == 1){
-									V[0xF] = 1;
-								}
-								display[x+axeX][y+axeY] ^= 1;
-							}
-							if((pixel2 & (0x80>>>axeX)) > 0 ){
-								if((x+8+ axeX)>=nbPixelsAxeXChip8){
-									continue;
-								}
-								if((y + axeY)>=nbPixelsAxeYChip8){
-									continue;
-								}
-								if(display[8+x+axeX][y+axeY] == 1){
-									V[0xF] = 1;
-								}
-								display[8+x+axeX][y+axeY] ^= 1;
-							}
-						}
-					}
-				}
-				else{
-					for(int axeY = 0 ; axeY < last ; axeY++){
-						int pixel = memory[I+axeY];
-						
-						for(short axeX = 0 ; axeX<8 ; axeX++){
-							if((pixel & (0x80>>> axeX)) > 0){
-								if((x + axeX)>=nbPixelsAxeXChip8){
-									continue;
-								}
-								if((y + axeY)>=nbPixelsAxeYChip8){
-									continue;
-								}
-								if(display[x+axeX][y+axeY] == 1){
-									V[0xF] = 1;
-								}
-								display[x+axeX][y+axeY] ^= 1;
-							}
-						}
-					}
-				}
 			}else{
-				int x = V[opcodeNibble[1]]&0xFF;
-				int y = V[opcodeNibble[2]]&0xFF;
-				int last = opcodeNibble[3];
-				System.out.println(last);
-				if(last == 0){
-					last = 16;
-				}
-				for(short axeY = 0; axeY < last; axeY++){
-					short pixel = memory[I+axeY];
-					//				System.out.println(String.format("pixel : %x, %x", pixel, I+axeY));
-					for(short axeX = 0 ; axeX<8 ; axeX++){
-						//On vérifie que le pixel n'est pas hors de "l ecran"
-						if((pixel & (0x80>>axeX)) > 0 ){
-							if((x + axeX)>=nbPixelsAxeXChip8){
-								continue;
-							}
-							if((y + axeY)>=nbPixelsAxeYChip8){
-								continue;
-							}
-							if(display[x+axeX][y+axeY] == 1){
-								V[0xF] = 1;
-							}
-							display[x+axeX][y+axeY] ^= 1;
-						}
-						//					System.out.println(String.format("pixel : %x, %x", pixel, xPlace+axeX));
-					}
-				}
+				dessin(x,y,last);
 			}
-			//			// Nombre de Byte verticaux
-			//			int nbByte = (opcode & 0x000F);
-			//			// Flag de collision
-			//			V[0xF] = 0;
-			//			//place de X et Y 
-			//			int xPlace = (V[opcodeNibble[1]]&0xFF);
-			//			int yPlace = (V[opcodeNibble[2]]&0xFF);
-			//
-			//			//Boucle d'affichage
-			//			int valeurX = 0;
-			//			if(!sChipMode){
-			//				valeurX = 8;
-			//				if(nbByte==0){
-			//					nbByte = 8;
-			//				}
-			//			}else{
-			//				valeurX = 16;
-			//				if(nbByte==0){
-			//					nbByte = 16;
-			//				}
-			//			}
-			//				for(short axeY = 0; axeY < nbByte; axeY++){
-			//					short pixel = memory[I+axeY];
-			//					//				System.out.println(String.format("pixel : %x, %x", pixel, I+axeY));
-			//					for(short axeX = 0 ; axeX<valeurX ; axeX++){
-			//						//On vérifie que le pixel n'est pas hors de "l ecran"
-			//						if((pixel & (0x80>>axeX)) > 0 ){
-			//							if((xPlace + axeX)>=nbPixelsAxeXChip8){
-			//								continue;
-			//							}
-			//							if((yPlace + axeY)>=nbPixelsAxeYChip8){
-			//								continue;
-			//							}
-			//							if(display[xPlace+axeX][yPlace+axeY] == 1){
-			//								V[0xF] = 1;
-			//							}
-			//							display[xPlace+axeX][yPlace+axeY] ^= 1;
-			//						}
-			//						//					System.out.println(String.format("pixel : %x, %x", pixel, xPlace+axeX));
-			//					}
-			//				}
 			if(ecranJeu!=null){
 				ecranJeu.repaint();
 			}
@@ -654,7 +510,6 @@ public class Chip8 {
 			if((opcode & 0x00FF) == 0x9E){
 				//On skip si la bonne touche est pressée
 				if (this.keys[this.V[opcodeNibble[1]]] == 1){
-					System.out.println("input attendus effectué EX9E");
 					PC+=4;
 				}else{
 					PC+=2;
@@ -664,7 +519,6 @@ public class Chip8 {
 				if(this.keys[this.V[opcodeNibble[1]]] == 0){
 					PC+=4;
 				}else{
-					System.out.println("input attendus effectué EXA1");
 					PC+=2;
 				}
 			}
@@ -682,9 +536,7 @@ public class Chip8 {
 			case 0x0A:
 				//On récupère une valeur d'input et on la stocke dans Vx
 				//Petite boucle pour éviter une boucle infinie qui rend impossible la récuperation de l'input
-				//Thread.yield();
 				boolean cycle= new Boolean(true);
-				System.out.println("Avant : "+V[opcodeNibble[1]]);
 				while(cycle){
 					for(int i =0 ; i<16 ; i++){
 						if(keys[i]==1){
@@ -698,8 +550,6 @@ public class Chip8 {
 						Thread.currentThread().interrupt();
 					}
 				}
-				System.out.println("input attendus effectué FX0A");
-				System.out.println("Après : "+V[opcodeNibble[1]]);
 				PC +=2;
 				break;
 			case 0x15:
@@ -714,9 +564,7 @@ public class Chip8 {
 				break;
 			case 0x1E:
 				//on set I à I+Vx
-				System.out.println("Avant FX1E I : "+I);
 				setRegI(I+(V[opcodeNibble[1]] & 0x00FF));
-				System.out.println("Après FX1E I : "+I);
 				PC +=2;
 				break;
 			case 0x29:
@@ -772,38 +620,123 @@ public class Chip8 {
 		}
 	}
 
-	private void scrollLeft() {
-		for(int i=0; i<128; i++)
-		{
-			for(int j=63; j>=0; j--)
-			{
-				if(j<60)
-					display[i][j]=display[i][j+4];
+	private void dessin(int x, int y, int last) {
+		if(last == 0){
+			last = 16;
+		}
+		for(short axeY = 0; axeY < last; axeY++){
+			short pixel = memory[I+axeY];
+			//				System.out.println(String.format("pixel : %x, %x", pixel, I+axeY));
+			for(short axeX = 0 ; axeX<8 ; axeX++){
+				//On vérifie que le pixel n'est pas hors de "l ecran"
+				if((pixel & (0x80>>axeX)) > 0 ){
+					if((x + axeX)>=nbPixelsAxeXChip8){
+						continue;
+					}
+					if((y + axeY)>=nbPixelsAxeYChip8){
+						continue;
+					}
+					if(display[y+axeY][x+axeX] == 1){
+						V[0xF] = 1;
+					}
+					display[y+axeY][x+axeX] ^= 1;
+				}
+				//					System.out.println(String.format("pixel : %x, %x", pixel, xPlace+axeX));
 			}
 		}
 	}
 
-	private void scrollRight() {
-		for(int i=0; i<128; i++)
-		{
-			for(int j=63; j>=0; j--)
-			{
-				if(j>4)
-					display[i][j]=display[i][j-4];
+	private void dessinExtended(int x, int y, int last) {
+		if(last == 0){
+			last = 16;
+			for (int axeY = 0 ; axeY < last ; axeY++){
+				int pixel1 = memory[I+axeY*2];
+				int pixel2 = memory[I+axeY*2+1];
+
+				for(short axeX = 0 ; axeX<8 ; axeX++){
+					//On vérifie que le pixel n'est pas hors de "l ecran"
+					if((pixel1 & (0x80>>>axeX)) > 0 ){
+						if((x + axeX)>=nbPixelsAxeXChip8){
+							continue;
+						}
+						if((y + axeY)>=nbPixelsAxeYChip8){
+							continue;
+						}
+						if(display[y+axeY][x+axeX] == 1){
+							V[0xF] = 1;
+						}
+						display[y+axeY][x+axeX] ^= 1;
+					}
+					if((pixel2 & (0x80>>>axeX)) > 0 ){
+						if((x+8+ axeX)>=nbPixelsAxeXChip8){
+							continue;
+						}
+						if((y + axeY)>=nbPixelsAxeYChip8){
+							continue;
+						}
+						if(display[y+axeY][8+x+axeX] == 1){
+							V[0xF] = 1;
+						}
+						display[y+axeY][8+x+axeX] ^= 1;
+					}
+				}
 			}
 		}
+		else{
+			for(int axeY = 0 ; axeY < last ; axeY++){
+				int pixel = memory[I+axeY];
+
+				for(short axeX = 0 ; axeX<8 ; axeX++){
+					if((pixel & (0x80>>> axeX)) > 0){
+						if((x + axeX)>=nbPixelsAxeXChip8){
+							continue;
+						}
+						if((y + axeY)>=nbPixelsAxeYChip8){
+							continue;
+						}
+						if(display[y+axeY][x+axeX] == 1){
+							V[0xF] = 1;
+						}
+						display[y+axeY][x+axeX] ^= 1;
+					}
+				}
+			}
+		}
+
+	}
+
+	private void scrollLeft() {
+		for (int i=0; i<nbPixelsAxeXChip8; i++) {
+            for (int j=0; j<nbPixelsAxeYChip8; j++) {
+                if (i<nbPixelsAxeXChip8-4)
+                    display[j][i] = display[j][i+4];
+                else
+                    display[j][i] = 0;
+            }
+        }
+	}
+
+	private void scrollRight() {
+		for (int i=nbPixelsAxeXChip8-1; i>=0; i--) {
+        for (int j=0; j<nbPixelsAxeYChip8; j++) {
+            if (i>4)
+               display[j][i] = display[j][i-4];
+            else
+               display[j][i] = 0;
+         }
+     }  
 
 	}
 
 	private void scrollDown(int last) {
-		for(int i=0; i<128; i++)
-		{
-			for(int j=63; j>=0; j--)
-			{
-				if(i>=last)
-					display[i][j]=display[i-last][j];
-			}
-		}
+		for (int i=0; i<nbPixelsAxeXChip8; i++) {
+            for (int j=nbPixelsAxeYChip8-1; j>=0; j--) {
+                if (j>=last)
+                    display[j][i] = display[j-last][i];
+                else
+                    display[j][i] = 0;
+            }
+        }
 
 	}
 
@@ -1015,8 +948,7 @@ public class Chip8 {
 	}
 
 	public void setKey(int key, boolean down) {
-		System.out.println(key);
-		if (key == -2) {
+		if (key == -1) {
 			return;
 		}
 		this.keys[key] = down ? 1 : 0;

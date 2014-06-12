@@ -1,7 +1,8 @@
 package test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.*;
+
+import java.util.Arrays;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -20,11 +21,6 @@ public class OpcodeTest {
 		this.chip8 = new Chip8();
 		this.pcTemoin = chip8.getPC();
 		this.displayTemoin = new byte[64][32];
-		for(int i=0;i<64;i++){
-			for(int j=0;j<32;j++){
-				this.displayTemoin[i][j] = 0;
-			}
-		}
 	}
 
 	@Test
@@ -57,22 +53,55 @@ public class OpcodeTest {
 	@Test
 	public void test00CN(){
 		pcTemoin = chip8.getPC();
-		chip8.opcode(0x00CF);
-		assertEquals("PC mal incrémenté",pcTemoin,chip8.getPC());
+		byte[][] displayTemoin2 = new byte[64][128];
+		for(int i=0 ; i<64 ; i++){
+			displayTemoin2[1][i]=1;
+		}
+		byte[][] displayTest = new byte[64][128];
+		for(int i=0 ; i<64 ; i++){
+			displayTest[0][i]=1;
+		}
+		chip8.setDisplay(displayTest);
+		chip8.setsChipMode(true);
+		chip8.opcode(0x00C1);
+		assertEquals("PC mal incrémenté",pcTemoin+2,chip8.getPC());
+		assertEquals("Display mal bougé",displayTemoin2,chip8.getDisplay());
 	}
 
 	@Test
 	public void test00FB(){
 		pcTemoin = chip8.getPC();
+		byte[][] displayTemoin2 = new byte[128][64];
+		for(int i=5 ; i<64 ; i++){
+			displayTemoin2[6][i]=1;
+		}
+		byte[][] displayTest = new byte[128][64];
+		for(int i=0 ; i<64 ; i++){
+			displayTest[6][i]=1;
+		}
+		chip8.setDisplay(displayTest);
+		chip8.setsChipMode(true);
 		chip8.opcode(0x00FB);
 		assertEquals("PC mal incrémenté",pcTemoin+2,chip8.getPC());
+		assertEquals("Display mal bougé",displayTemoin2,chip8.getDisplay());
 	}
 
 	@Test
 	public void test00FC(){
 		pcTemoin = chip8.getPC();
+		byte[][] displayTemoin2 = new byte[128][64];
+		for(int i=0 ; i<60 ; i++){
+			displayTemoin2[6][i]=1;
+		}
+		byte[][] displayTest = new byte[128][64];
+		for(int i=0 ; i<64 ; i++){
+			displayTest[6][i]=1;
+		}
+		chip8.setDisplay(displayTest);
+		chip8.setsChipMode(true);
 		chip8.opcode(0x00FC);
 		assertEquals("PC mal incrémenté",pcTemoin+2,chip8.getPC());
+		assertEquals("Display mal bougé",displayTemoin2,chip8.getDisplay());
 	}
 
 	@Test
@@ -433,8 +462,6 @@ public class OpcodeTest {
 		ToucheListener touche = new ToucheListener();
 		pcTemoin = chip8.getPC();
 		chip8.setV(VTemoins);
-		chip8.setInput(touche);
-		chip8.setKey((byte)0x07);
 		chip8.opcode(0xE79E);
 		assertEquals("PC non incrémenté", pcTemoin+2, this.chip8.getPC());
 
@@ -448,7 +475,6 @@ public class OpcodeTest {
 		ToucheListener touche = new ToucheListener();
 		pcTemoin = chip8.getPC();
 		chip8.setV(VTemoins);
-		chip8.setInput(touche);
 		chip8.opcode(0xE7A1);
 		assertEquals("PC non incrémenté", pcTemoin+4, this.chip8.getPC());
 	}
@@ -467,8 +493,6 @@ public class OpcodeTest {
 		byte[] VTemoins = new byte[16];
 		ToucheListener touche = new ToucheListener();
 		chip8.setV(VTemoins);
-		chip8.setInput(touche);
-		chip8.setKey((byte)0x07);
 		chip8.opcode(0xF70A);
 		assertEquals("Le setter n'a pas fonctionné",0x07,this.chip8.getV()[7]);
 	}
@@ -496,7 +520,7 @@ public class OpcodeTest {
 	@Test
 	public void testFX1E(){
 		byte[] VTemoins = new byte[16];
-		short tmpI = chip8.getI();
+		short tmpI = (short) chip8.getI();
 		chip8.setV(VTemoins);
 		chip8.opcode(0xF91E);
 		assertEquals("Le setter n'a pas fonctionné",chip8.getI(),tmpI+this.chip8.getV()[9]);
@@ -540,7 +564,7 @@ public class OpcodeTest {
 		byte[] VTemoins = new byte[16];
 		chip8.setV(VTemoins);
 		byte[] memory = chip8.getMemory();
-		short i = chip8.getI();
+		short i = (short) chip8.getI();
 		chip8.opcode(0xF955);
 		for(int j = 0 ; j < iter ; j++){
 			assertEquals("Inégalité à la "+j+"ème itérations",
@@ -556,7 +580,7 @@ public class OpcodeTest {
 		byte[] VTemoins = new byte[16];
 		chip8.setV(VTemoins);
 		byte[] memory = chip8.getMemory();
-		short i = chip8.getI();
+		short i = (short) chip8.getI();
 		chip8.opcode(0xF965);
 		for(int j = 0 ; j < iter ; j++){
 			assertEquals("Inégalité à la "+j+"ème itérations",
