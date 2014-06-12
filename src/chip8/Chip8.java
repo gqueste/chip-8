@@ -626,9 +626,7 @@ public class Chip8 {
 		}
 		for(short axeY = 0; axeY < last; axeY++){
 			short pixel = memory[I+axeY];
-			//				System.out.println(String.format("pixel : %x, %x", pixel, I+axeY));
 			for(short axeX = 0 ; axeX<8 ; axeX++){
-				//On vérifie que le pixel n'est pas hors de "l ecran"
 				if((pixel & (0x80>>axeX)) > 0 ){
 					if((x + axeX)>=nbPixelsAxeXChip8){
 						continue;
@@ -641,7 +639,6 @@ public class Chip8 {
 					}
 					display[y+axeY][x+axeX] ^= 1;
 				}
-				//					System.out.println(String.format("pixel : %x, %x", pixel, xPlace+axeX));
 			}
 		}
 	}
@@ -945,6 +942,14 @@ public class Chip8 {
 
 	public void setNbPixelsAxeXChip8(int nbPixelsAxeXChip8) {
 		this.nbPixelsAxeXChip8 = nbPixelsAxeXChip8;
+	}
+
+	public int[] getKeys() {
+		return keys;
+	}
+
+	public void setKeys(int[] keys) {
+		this.keys = keys;
 	}
 
 	public void setKey(int key, boolean down) {

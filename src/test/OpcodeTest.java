@@ -1,8 +1,7 @@
 package test;
 
-import static org.junit.Assert.*;
-
-import java.util.Arrays;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -83,7 +82,7 @@ public class OpcodeTest {
 		chip8.setsChipMode(true);
 		chip8.opcode(0x00FB);
 		assertEquals("PC mal incrémenté",pcTemoin+2,chip8.getPC());
-		assertEquals("Display mal bougé",displayTemoin2,chip8.getDisplay());
+		assertEquals("Display mal déplacé",displayTemoin2,chip8.getDisplay());
 	}
 
 	@Test
@@ -458,12 +457,14 @@ public class OpcodeTest {
 	public void testEX9E(){
 		byte[] VTemoins = new byte[16];
 		byte VxTemoin = (byte) 0x07;
+		int[] keysTemoins = new int[16];
+		keysTemoins[7]=1;
 		VTemoins[7] = VxTemoin;
-		ToucheListener touche = new ToucheListener();
 		pcTemoin = chip8.getPC();
 		chip8.setV(VTemoins);
+		chip8.setKeys(keysTemoins);
 		chip8.opcode(0xE79E);
-		assertEquals("PC non incrémenté", pcTemoin+2, this.chip8.getPC());
+		assertEquals("PC non incrémenté", pcTemoin+4, this.chip8.getPC());
 
 	}
 
@@ -471,10 +472,12 @@ public class OpcodeTest {
 	public void testEXA1(){
 		byte[] VTemoins = new byte[16];
 		byte VxTemoin = (byte) 0x07;
+		int[] keysTemoins = new int[16];
+		keysTemoins[7]=0;
 		VTemoins[7] = VxTemoin;
-		ToucheListener touche = new ToucheListener();
 		pcTemoin = chip8.getPC();
 		chip8.setV(VTemoins);
+		chip8.setKeys(keysTemoins);
 		chip8.opcode(0xE7A1);
 		assertEquals("PC non incrémenté", pcTemoin+4, this.chip8.getPC());
 	}
@@ -491,8 +494,13 @@ public class OpcodeTest {
 	@Test
 	public void testFX0A(){
 		byte[] VTemoins = new byte[16];
-		ToucheListener touche = new ToucheListener();
+		byte VxTemoin = (byte) 0x07;
+		int[] keysTemoins = new int[16];
+		keysTemoins[7]=1;
+		VTemoins[7] = VxTemoin;
+		pcTemoin = chip8.getPC();
 		chip8.setV(VTemoins);
+		chip8.setKeys(keysTemoins);
 		chip8.opcode(0xF70A);
 		assertEquals("Le setter n'a pas fonctionné",0x07,this.chip8.getV()[7]);
 	}
