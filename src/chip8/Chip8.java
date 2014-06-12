@@ -12,17 +12,16 @@ import sun.audio.AudioStream;
 public class Chip8 {
 
 	//private final int LIMIT_NUMBER-INSTRUCTION;
-	
+
 	public final static double DEFAULT_INSTRUCTIONS_RATE = 20;
 
 	private int PC, delay_timer, sound_timer;
-	private byte SP,key;
-	private short I;
+	private byte SP;
+	private int I;
 	private byte[] V, memory,rom, RPLUserFlag;
 	private byte[][] display;
 	private int[] stack;
 	private Random random;
-	private ToucheListener input;
 	// Attributs relatifs au temps et rythme d'interprétation des instructions
 	private double rate, per, allowance;
 	private long current, passed, last_checked;
@@ -30,7 +29,7 @@ public class Chip8 {
 	private boolean sChipMode = false;
 	private boolean cycle = true;
 	private Ecran ecranJeu;
-	
+
 	private int[] keys;
 
 	private int nbPixelsAxeYChip8 = 32;
@@ -47,14 +46,13 @@ public class Chip8 {
 		this.RPLUserFlag = new byte[16];
 		this.random = new Random(567765);
 		this.memory = new byte[4096];
-		System.out.println("Load");
 		// 14 instructions pour 100 ms
 		this.setRate(14);
 		per = 100;
 		allowance = rate;
 		last_checked = System.currentTimeMillis();
 
-		display = new byte[nbPixelsAxeXChip8][nbPixelsAxeXChip8];
+		display = new byte[nbPixelsAxeXChip8][nbPixelsAxeYChip8];
 		for(int i=0;i<nbPixelsAxeXChip8;i++){
 			for(int j=0;j<nbPixelsAxeYChip8;j++){
 				this.display[i][j] = 0;
@@ -67,7 +65,7 @@ public class Chip8 {
 	 * @param rom
 	 * @param touche
 	 */
-	public Chip8(File rom, ToucheListener touche) {
+	public Chip8(File rom) {
 		this.I = 0x0;
 		this.PC = 0;
 		this.SP = 0;
@@ -83,15 +81,13 @@ public class Chip8 {
 		allowance = rate;
 		last_checked = System.currentTimeMillis();
 
-		display = new byte[nbPixelsAxeXChip8][nbPixelsAxeXChip8];
+		display = new byte[nbPixelsAxeXChip8][nbPixelsAxeYChip8];
 		for(int i=0;i<64;i++){
 			for(int j=0;j<32;j++){
 				this.display[i][j] = 0;
 			}
 		}
 
-		this.input = touche;
-		this.key = -1;
 		System.out.println("loadRom");
 		loadRom(rom);
 		System.out.println("lu");
@@ -225,19 +221,16 @@ public class Chip8 {
 	 */
 	public void opcode(int opcode){
 
-		int x = ((opcode & 0x0F00) >> 8);
-		int y = ((opcode & 0x00F0) >> 4);
-		int kk = (opcode & 0xFF);
-		int nnn = (opcode & 0xFFF);
-
-		int first = opcode & 0xF000;
-		int last = opcode & 0x000F;
-
-		//		System.out.println("Opcode : " +  String.format("0x%4s", Integer.toHexString(opcode)).replace(' ', '0'));
-		switch (first) {
-		case 0x0000 :
-			if(x != 0x0000) {
-				System.out.println("Opcode non reconnu : " + String.format("%02X", opcode));
+		int[] opcodeNibble = new int[4];
+		opcodeNibble[0] = ((opcode & 0xF000) >> 12);
+		opcodeNibble[1] = ((opcode & 0x0F00) >> 8);
+		opcodeNibble[2] = ((opcode & 0x00F0) >> 4);
+		opcodeNibble[3] = ((opcode & 0x000F) >> 0);
+		System.out.println("Opcode : " +  String.format("0x%4s", Integer.toHexString(opcode)).replace(' ', '0'));
+		switch (opcodeNibble[0]) {
+		case 0x0 :
+			if(opcodeNibble[1] != 0x0) {
+				System.out.println("Opcode non reconnu : " + String.format("%04X", opcode));
 			}
 			else {
 				if(opcode == 0x00E0) {
@@ -255,19 +248,24 @@ public class Chip8 {
 					this.PC = this.stack[this.SP];
 					this.PC += 2;
 				}
-				else if (opcode == 0x00C0){
-					scrollDown(last);
+				else if (opcodeNibble[2]==0xc){
+					if(sChipMode){
+						scrollDown(opcodeNibble[3]);
+						ecranJeu.repaint();
+					}
 					this.PC += 2;
 				}
 				else if (opcode == 0x00FB){
 					if(sChipMode){
 						scrollRight();
+						ecranJeu.repaint();
 					}
 					this.PC +=2;
 				}
 				else if (opcode == 0x00FC){
 					if(sChipMode){
 						scrollLeft();
+						ecranJeu.repaint();
 					}
 					this.PC +=2;
 				}
@@ -276,41 +274,40 @@ public class Chip8 {
 				}
 				else if (opcode == 0x00FE){
 					sChipMode=false;
+					if(!issChipMode()){
+						nbPixelsAxeXChip8 = 64;
+						nbPixelsAxeYChip8 = 32;
+						display = new byte[nbPixelsAxeXChip8][nbPixelsAxeYChip8];
+					}
 					this.PC +=2;
 				}
 				else if (opcode == 0x00FF){
 					sChipMode=true;
 					if(issChipMode()){
-						System.out.println("SCmode");
 						nbPixelsAxeXChip8 = 128;
 						nbPixelsAxeYChip8 = 64;
 						display = new byte[nbPixelsAxeXChip8][nbPixelsAxeYChip8];
-						for(int i=0;i<nbPixelsAxeXChip8;i++){
-							for(int j=0;j<nbPixelsAxeYChip8;j++){
-								this.display[i][j] = 0;
-							}
-						}
 					}
 					this.PC +=2;
 				}
 			}
 			break;
 
-		case 0x1000:
+		case 0x1:
 			// Jump to adress
-			PC = (short)(opcode & 0x0FFF);			
+			PC = (opcode & 0x0FFF);			
 			break;
 
-		case 0x2000:
+		case 0x2:
 			// Call a subroutine
 			stack[SP] = PC;
 			SP++;
 			PC = (short)(opcode & 0x0FFF);
 			break;
 
-		case 0x3000:
+		case 0x3:
 			//Skip if equal
-			if(V[x] == (byte)kk) {
+			if(V[opcodeNibble[1]] == (opcode & 0x00FF)) {
 				PC += 4;
 			}
 			else {
@@ -318,9 +315,9 @@ public class Chip8 {
 			}
 			break;
 
-		case 0x4000:
+		case 0x4:
 			//Skip if not equal
-			if(V[x] != (byte)kk) {
+			if(V[opcodeNibble[1]] != (opcode & 0x00FF)) {
 				PC += 4;
 			}
 			else {
@@ -328,8 +325,8 @@ public class Chip8 {
 			}
 			break;
 
-		case 0x5000:
-			if(V[x] == V[y]) {
+		case 0x5:
+			if(V[opcodeNibble[1]] == V[opcodeNibble[2]]) {
 				PC += 4;
 			}
 			else {
@@ -337,26 +334,26 @@ public class Chip8 {
 			}
 			break;
 
-		case 0x6000:
+		case 0x6:
 			//Set of Vx
-			V[x] = (byte) kk;
+			V[opcodeNibble[1]] = (byte) (opcode & 0x00FF);
 			PC += 2;
 			break;
 
-		case 0x7000:
+		case 0x7:
 			//Add to x
-			V[x] = (byte)(V[x] + kk);
+			V[opcodeNibble[1]] = (byte)(V[opcodeNibble[1]] + (opcode & 0x00FF));
 			PC += 2;
 			break;
 
-		case 0x8000:
+		case 0x8:
 		{
-			int mask = (opcode & 0xF);			
+			int mask = (opcode & 0x000F);			
 			switch(mask) {
 			case 0x0:
 			{
 				// Set Vx = Vy.
-				V[x] = V[y];
+				V[opcodeNibble[1]] = V[opcodeNibble[2]];
 
 				break;
 			}
@@ -365,7 +362,7 @@ public class Chip8 {
 			{
 				// Set Vx = Vx OR Vy.
 
-				V[x] = (byte)(V[x] | V[y]);
+				V[opcodeNibble[1]] = (byte)(V[opcodeNibble[1]] | V[opcodeNibble[2]]);
 
 				break;
 			}
@@ -376,7 +373,7 @@ public class Chip8 {
 				 * Set Vx = Vx AND Vy.
 				 */
 
-				V[x] = (byte)(V[x] & V[y]);				
+				V[opcodeNibble[1]] = (byte)(V[opcodeNibble[1]] & V[opcodeNibble[2]]);				
 				break;
 			}
 
@@ -386,8 +383,7 @@ public class Chip8 {
 				 * Set Vx = Vx XOR Vy.
 				 */
 
-				V[x] ^= V[y];
-
+				V[opcodeNibble[1]] ^= V[opcodeNibble[2]];
 				break;
 			}
 
@@ -397,9 +393,9 @@ public class Chip8 {
 				 * Set Vx = Vx + Vy, set VF = carry.
 				 */
 
-				V[x] = (byte)(V[x] + V[y]);
+				V[opcodeNibble[1]] = (byte)(V[opcodeNibble[1]] + V[opcodeNibble[2]]);
 
-				if((V[x] + V[y]) > 255)
+				if((V[opcodeNibble[1]] + V[opcodeNibble[2]]) > 255)
 					V[0xF] = 1;
 				else
 					V[0xF] = 0;
@@ -413,12 +409,12 @@ public class Chip8 {
 				 * Set Vx = Vx - Vy, set VF = NOT borrow.
 				 */
 
-				if(V[x] > V[y])
+				if(V[opcodeNibble[1]] > V[opcodeNibble[2]])
 					V[0xF] = 1;
 				else
 					V[0xF] = 0;
 
-				V[x] = (byte)(V[x] - V[y]);
+				V[opcodeNibble[1]] = (byte)(V[opcodeNibble[1]] - V[opcodeNibble[2]]);
 
 				break;
 			}
@@ -429,17 +425,22 @@ public class Chip8 {
 				 * Set Vx = Vx SHR 1.
 				 */
 
+				int temp = V[opcodeNibble[2]] <= V[opcodeNibble[1]]? 0x01 : 0x00;
+				V[opcodeNibble[1]] = (byte) (V[opcodeNibble[1]] - V[opcodeNibble[2]]);
+				V[0xF] = (byte) temp;
+				//                setPC(PC+2);
+
 				// Set carry flag if LSb of Vx is set
-				if((V[x] & 0x1) == 1) {
-					V[0xF] = 1;
-				}
-				else {
-					V[0xF] = 0;
-				}
+				//				if((V[opcodeNibble[1]] & 0x1) == 1) {
+				//					V[0xF] = 1;
+				//				}
+				//				else {
+				//					V[0xF] = 0;
+				//				}
+				//
+				//				V[x] >>= 1;
 
-				V[x] >>= 1;
-
-						break;
+				break;
 			}
 
 			case 0x7:
@@ -448,9 +449,9 @@ public class Chip8 {
 				 * Set Vx = Vy - Vx, set VF = NOT borrow.
 				 */
 
-				V[0xF] = (V[y] > V[x]) ? (byte)1 : 0;
+				V[0xF] = (V[opcodeNibble[1]] <= V[opcodeNibble[2]]) ? (byte)1 : 0;
 
-				V[x] = (byte)(V[y] - V[x]);
+				V[opcodeNibble[1]] = (byte)(V[opcodeNibble[2]] - V[opcodeNibble[1]]);
 
 				break;
 			}
@@ -462,9 +463,9 @@ public class Chip8 {
 				 */
 
 				// Set flag register if MSb of Vx is set
-				V[0xF] = (((V[x] & 0x80) >> 7) == 1) ? (byte)1 : 0;
+				V[0xF] = (((V[opcodeNibble[1]] & 0x80) >> 7) == 1) ? (byte)1 : 0;
 
-				V[x] <<= 1;
+				V[opcodeNibble[1]] <<= 1;
 
 				break;
 			}
@@ -475,96 +476,191 @@ public class Chip8 {
 			PC += 2;
 			break;
 		}
-		case 0x9000:
+		case 0x9:
 			//Skips
-			if(this.V[x] == this.V[y]){
+			if(this.V[opcodeNibble[1]] == this.V[opcodeNibble[2]]){
 				this.PC += 2;
 			}
 			else{
 				this.PC += 4;
 			}
 			break;
-		case 0xA000:
+		case 0xA:
 			//Set I
-			this.I = (short) nnn;
+			System.out.println(opcode&0x0FFF);
+			setRegI(opcode&0x0FFF);
+			System.out.println("AXXX : "+I);
 			this.PC += 2;
 			break;
-		case 0xB000:
+		case 0xB:
 			/**
 			 * BNNN : Instruction pour sauter à l'adresse NNN depuis le registre v0 
 			 */
-			PC = (short)(nnn + V[0]);
+			PC = ((opcode & 0x0FFF)+V[0])&0x0FFF;
 			break;
-		case 0xC000:
+		case 0xC:
 			/**
 			 * CXKK Generer un byte aléatoire pour le registre Vx et y ajouter KK
 			 */
-			V[x] = (byte)(random.nextInt(255)&kk);
+			V[opcodeNibble[1]] = (byte) ((int)(Math.random()*0xFF) & (opcode & 0x00FF));
 			PC += 2;
 			break;
-		case 0xD000:
+		case 0xD:
 			/**
 			 * DXYN : Affichage des sprites
 			 */
-			// Nombre de Byte verticaux
-			int nbByte = (opcode & 0x000F);
-			// Flag de collision
 			V[0xF] = 0;
-			//place de X et Y 
-			int xPlace = (V[x]&0xFF);
-			int yPlace = (V[y]&0xFF);
+			System.out.println("DXYN I : "+I);
+			if(issChipMode()) {
+				int x = V[opcodeNibble[1]]&0xFF;
+				int y = V[opcodeNibble[2]]&0xFF;
+				int last = opcodeNibble[3];
+				if(last == 0){
+					last = 16;
+					for (int axeY = 0 ; axeY < last ; axeY++){
+						int pixel1 = memory[I+axeY*2];
+						int pixel2 = memory[I+axeY*2+1];
 
-			//Boucle d'affichage
-			int valeurX = 0;
-			if(!sChipMode){
-				valeurX = 8;
+						for(short axeX = 0 ; axeX<8 ; axeX++){
+							//On vérifie que le pixel n'est pas hors de "l ecran"
+							if((pixel1 & (0x80>>>axeX)) > 0 ){
+								if((x + axeX)>=nbPixelsAxeXChip8){
+									continue;
+								}
+								if((y + axeY)>=nbPixelsAxeYChip8){
+									continue;
+								}
+								if(display[x+axeX][y+axeY] == 1){
+									V[0xF] = 1;
+								}
+								display[x+axeX][y+axeY] ^= 1;
+							}
+							if((pixel2 & (0x80>>>axeX)) > 0 ){
+								if((x+8+ axeX)>=nbPixelsAxeXChip8){
+									continue;
+								}
+								if((y + axeY)>=nbPixelsAxeYChip8){
+									continue;
+								}
+								if(display[8+x+axeX][y+axeY] == 1){
+									V[0xF] = 1;
+								}
+								display[8+x+axeX][y+axeY] ^= 1;
+							}
+						}
+					}
+				}
+				else{
+					for(int axeY = 0 ; axeY < last ; axeY++){
+						int pixel = memory[I+axeY];
+						
+						for(short axeX = 0 ; axeX<8 ; axeX++){
+							if((pixel & (0x80>>> axeX)) > 0){
+								if((x + axeX)>=nbPixelsAxeXChip8){
+									continue;
+								}
+								if((y + axeY)>=nbPixelsAxeYChip8){
+									continue;
+								}
+								if(display[x+axeX][y+axeY] == 1){
+									V[0xF] = 1;
+								}
+								display[x+axeX][y+axeY] ^= 1;
+							}
+						}
+					}
+				}
 			}else{
-				valeurX = 16;
-			}
-				for(short axeY = 0; axeY < nbByte; axeY++){
+				int x = V[opcodeNibble[1]]&0xFF;
+				int y = V[opcodeNibble[2]]&0xFF;
+				int last = opcodeNibble[3];
+				System.out.println(last);
+				if(last == 0){
+					last = 16;
+				}
+				for(short axeY = 0; axeY < last; axeY++){
 					short pixel = memory[I+axeY];
 					//				System.out.println(String.format("pixel : %x, %x", pixel, I+axeY));
-					for(short axeX = 0 ; axeX<valeurX ; axeX++){
+					for(short axeX = 0 ; axeX<8 ; axeX++){
 						//On vérifie que le pixel n'est pas hors de "l ecran"
 						if((pixel & (0x80>>axeX)) > 0 ){
-							if((xPlace + axeX)>nbPixelsAxeXChip8){
+							if((x + axeX)>=nbPixelsAxeXChip8){
 								continue;
 							}
-							if((yPlace + axeY)>nbPixelsAxeYChip8){
+							if((y + axeY)>=nbPixelsAxeYChip8){
 								continue;
 							}
-							if(display[xPlace+axeX][yPlace+axeY] == 1){
+							if(display[x+axeX][y+axeY] == 1){
 								V[0xF] = 1;
 							}
-							display[xPlace+axeX][yPlace+axeY] ^= 1;
+							display[x+axeX][y+axeY] ^= 1;
 						}
 						//					System.out.println(String.format("pixel : %x, %x", pixel, xPlace+axeX));
 					}
 				}
+			}
+			//			// Nombre de Byte verticaux
+			//			int nbByte = (opcode & 0x000F);
+			//			// Flag de collision
+			//			V[0xF] = 0;
+			//			//place de X et Y 
+			//			int xPlace = (V[opcodeNibble[1]]&0xFF);
+			//			int yPlace = (V[opcodeNibble[2]]&0xFF);
+			//
+			//			//Boucle d'affichage
+			//			int valeurX = 0;
+			//			if(!sChipMode){
+			//				valeurX = 8;
+			//				if(nbByte==0){
+			//					nbByte = 8;
+			//				}
+			//			}else{
+			//				valeurX = 16;
+			//				if(nbByte==0){
+			//					nbByte = 16;
+			//				}
+			//			}
+			//				for(short axeY = 0; axeY < nbByte; axeY++){
+			//					short pixel = memory[I+axeY];
+			//					//				System.out.println(String.format("pixel : %x, %x", pixel, I+axeY));
+			//					for(short axeX = 0 ; axeX<valeurX ; axeX++){
+			//						//On vérifie que le pixel n'est pas hors de "l ecran"
+			//						if((pixel & (0x80>>axeX)) > 0 ){
+			//							if((xPlace + axeX)>=nbPixelsAxeXChip8){
+			//								continue;
+			//							}
+			//							if((yPlace + axeY)>=nbPixelsAxeYChip8){
+			//								continue;
+			//							}
+			//							if(display[xPlace+axeX][yPlace+axeY] == 1){
+			//								V[0xF] = 1;
+			//							}
+			//							display[xPlace+axeX][yPlace+axeY] ^= 1;
+			//						}
+			//						//					System.out.println(String.format("pixel : %x, %x", pixel, xPlace+axeX));
+			//					}
+			//				}
 			if(ecranJeu!=null){
 				ecranJeu.repaint();
 			}
 			PC +=2;
 			break;
-		case 0xE000:
+		case 0xE:
 			/**
 			 * Instruction commençant par un E
 			 */
 			// on récupère le reste de l'instruction
-			if(kk == 0x9E){
+			if((opcode & 0x00FF) == 0x9E){
 				//On skip si la bonne touche est pressée
-				key = input.getInput();
-				if (this.keys[this.V[x]] == 1){
+				if (this.keys[this.V[opcodeNibble[1]]] == 1){
 					System.out.println("input attendus effectué EX9E");
 					PC+=4;
 				}else{
 					PC+=2;
 				}
-			}else if(kk == 0xA1){
-				//FIXME problème de latence
+			}else if((opcode & 0x00FF) == 0xA1){
 				//On skip si la bonne touche n est pas pressée
-				key = input.getInput();
-				if(this.keys[this.V[x]] == 0){
+				if(this.keys[this.V[opcodeNibble[1]]] == 0){
 					PC+=4;
 				}else{
 					System.out.println("input attendus effectué EXA1");
@@ -572,21 +668,29 @@ public class Chip8 {
 				}
 			}
 			break;
-		case 0xF000:
+		case 0xF:
 			/**
 			 * Toutes les instructions qui commence par F
 			 */
-			switch(kk){
+			switch((opcode & 0x00FF)){
 			case 0x07:
 				//On set la valeur du Vx à celle du delay_timer
-				V[x] = (byte)delay_timer;
+				V[opcodeNibble[1]] = (byte)delay_timer;
+				PC +=2;
 				break;
 			case 0x0A:
 				//On récupère une valeur d'input et on la stocke dans Vx
 				//Petite boucle pour éviter une boucle infinie qui rend impossible la récuperation de l'input
 				//Thread.yield();
-				while(key == -1){
-					key = input.getInput();
+				boolean cycle= new Boolean(true);
+				System.out.println("Avant : "+V[opcodeNibble[1]]);
+				while(cycle){
+					for(int i =0 ; i<16 ; i++){
+						if(keys[i]==1){
+							V[opcodeNibble[1]] = (byte) i;
+							cycle=false;
+						}
+					}
 					try {
 						Thread.sleep(1);
 					} catch(InterruptedException ex) {
@@ -594,61 +698,73 @@ public class Chip8 {
 					}
 				}
 				System.out.println("input attendus effectué FX0A");
-				V[x] = key;
+				System.out.println("Après : "+V[opcodeNibble[1]]);
+				PC +=2;
 				break;
 			case 0x15:
 				// On set le delay_timer à Vx
-				delay_timer = (V[x] & 0xFF);
+				delay_timer = (V[opcodeNibble[1]] & 0xFF);
+				PC +=2;
 				break;
 			case 0x18:
 				// on set le sound_timer à Vx
-				sound_timer = (V[x] & 0xFF);
+				sound_timer = (V[opcodeNibble[1]] & 0xFF);
+				PC +=2;
 				break;
 			case 0x1E:
 				//on set I à I+Vx
-				I = (short)(I+V[x]);
+				System.out.println("Avant FX1E I : "+I);
+				setRegI(I+(V[opcodeNibble[1]] & 0x00FF));
+				System.out.println("Après FX1E I : "+I);
+				PC +=2;
 				break;
 			case 0x29:
 				//On set de I avec la position du sprite de l'octet Vx
-				I = (short)(V[x]*5);
+				setRegI(V[opcodeNibble[1]]*5);
+				PC +=2;
 				break;
 			case 0x30:
-				I = (short)(V[x]*10);
+				setRegI(0x50 + V[opcodeNibble[1]]*10);
+				PC +=2;
 				break;
 			case 0x33:
-				//On stock la repr�sentation BCD du registre vr dans I,I+1,I+2
-				byte number = this.V[x];
-
-                for (int i = 3; i > 0; i--) {
-                    this.memory[this.I + i - 1] = (byte) (number % 10);
-                    number /= 10;
-                }
-                
-                break;
+				//On stock la représentation BCD du registre vr dans I,I+1,I+2
+				byte number = this.V[opcodeNibble[1]];
+				for (int i = 3; i > 0; i--) {
+					this.memory[this.I + i - 1] = (byte) (number % 10);
+					number /= 10;
+				}
+				PC +=2;
+				break;
 			case 0x55:
-				for(int i = 0; i <= x; i++)
+				for(int i = 0; i <= opcodeNibble[1]; i++){
 					memory[I + i] = V[i];
-
+				}
+				PC +=2;
 				break;
 			case 0x65:
-				for(int i = 0;i<=x;i++){
+				for(int i = 0;i<=opcodeNibble[1];i++){
 					V[i] = memory[I + i];
 				}
+				PC +=2;
 				break;
 			case 0x75:
-				for(int i=0 ; i<=x ; i++){
+				int temp = (opcodeNibble[1] < 8 ? opcodeNibble[1] : 7);
+				for(int i=0 ; i<=temp ; i++){
 					RPLUserFlag[i] = V[i];
 				}
+				PC +=2;
 				break;
 			case 0x85:
-				for(int i=0 ; i<=x ; i++){
+				int temp2 = (opcodeNibble[1] < 8 ? opcodeNibble[1] : 7);
+				for(int i=0 ; i<=temp2 ; i++){
 					V[i] = RPLUserFlag[i];
 				}
+				PC +=2;
 				break;
 			default:
 				break;
 			}
-			PC +=2;
 			break;
 		default:
 			break;
@@ -683,7 +799,7 @@ public class Chip8 {
 		{
 			for(int j=63; j>=0; j--)
 			{
-				if(j>=last)
+				if(i>=last)
 					display[i][j]=display[i-last][j];
 			}
 		}
@@ -713,11 +829,11 @@ public class Chip8 {
 		SP = sP;
 	}
 
-	public short getI() {
+	public int getI() {
 		return I;
 	}
 
-	public void setI(short i) {
+	public void setI(int i) {
 		I = i;
 	}
 
@@ -769,28 +885,12 @@ public class Chip8 {
 		this.sound_timer = sound_timer;
 	}
 
-	public byte getKey() {
-		return key;
-	}
-
-	public void setKey(byte key) {
-		this.key = key;
-	}
-
 	public Random getRandom() {
 		return random;
 	}
 
 	public void setRandom(Random random) {
 		this.random = random;
-	}
-
-	public ToucheListener getInput() {
-		return input;
-	}
-
-	public void setInput(ToucheListener input) {
-		this.input = input;
 	}
 
 	public byte[] getRom() {
@@ -915,10 +1015,10 @@ public class Chip8 {
 
 	public void setKey(int key, boolean down) {
 		System.out.println(key);
-        if (key == -1) {
-            return;
-        }
-        this.keys[key] = down ? 1 : 0;
-    }
-
+		if (key == -2) {
+			return;
+		}
+		this.keys[key] = down ? 1 : 0;
+	}
+	public void setRegI(int b) { I = b & 0xFFFF; }
 }

@@ -27,7 +27,6 @@ public class UI {
 	private JFrame fenetreJeu;
 	private JFileChooser chooser;
 	private File rom;
-	private ToucheListener touche;
 	private Chip8 chip8;
 	private Ecran ecran;
 	private Thread threadJeu;
@@ -46,7 +45,6 @@ public class UI {
 		
 		ecran = new Ecran(null,128,64);
 		fenetreJeu.add(ecran);
-		touche = new ToucheListener();
 	}
 	
 	/**
@@ -148,7 +146,7 @@ public class UI {
 		menuBar.add(menuAbout);
 		fenetreJeu.setJMenuBar(menuBar);
 
-		//Emp�che de lancer l'émulateur sans une rom validée
+		//Emp�che de lancer l'émulateur sans une rom validée
 		do {
 			rom = this.selectRom();
 		}while (this.getRom() == null);
@@ -163,7 +161,7 @@ public class UI {
 	 */
 	public void chargeRom(File romLancee) {
 		fenetreJeu.remove(ecran);
-		chip8 = new Chip8(romLancee, touche);
+		chip8 = new Chip8(romLancee);
 		chip8.lirePremierOpcode();
 		ecran = new Ecran(chip8.getDisplay(),chip8.getNbPixelsAxeXChip8(),chip8.getNbPixelsAxeYChip8());
 		chip8.setEcran(ecran);
