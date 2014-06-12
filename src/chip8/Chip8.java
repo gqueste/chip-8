@@ -30,6 +30,8 @@ public class Chip8 {
 	private boolean sChipMode = false;
 	private boolean cycle = true;
 	private Ecran ecranJeu;
+	
+	private int[] keys;
 
 	private int nbPixelsAxeYChip8 = 32;
 	private int nbPixelsAxeXChip8 = 64;
@@ -73,6 +75,7 @@ public class Chip8 {
 		this.V = new byte[16];
 		this.random = new Random(567765);
 		this.memory = new byte[4096];
+		this.keys = new int[16];
 		loadMemory();
 		// 20 instructions pour 100 ms
 		this.setRate(DEFAULT_INSTRUCTIONS_RATE);
@@ -505,7 +508,6 @@ public class Chip8 {
 			/**
 			 * DXYN : Affichage des sprites
 			 */
-			System.out.println("Affichage");
 			// Nombre de Byte verticaux
 			int nbByte = (opcode & 0x000F);
 			// Flag de collision
@@ -553,9 +555,8 @@ public class Chip8 {
 			// on récupère le reste de l'instruction
 			if(kk == 0x9E){
 				//On skip si la bonne touche est pressée
-				//Thread.yield();
 				key = input.getInput();
-				if(V[x]==key){
+				if (this.keys[this.V[x]] == 1){
 					System.out.println("input attendus effectué EX9E");
 					PC+=4;
 				}else{
@@ -564,9 +565,8 @@ public class Chip8 {
 			}else if(kk == 0xA1){
 				//FIXME problème de latence
 				//On skip si la bonne touche n est pas pressée
-				//Thread.yield();
 				key = input.getInput();
-				if(V[x]!=key){
+				if(this.keys[this.V[x]] == 0){
 					PC+=4;
 				}else{
 					System.out.println("input attendus effectué EXA1");
@@ -914,5 +914,13 @@ public class Chip8 {
 	public void setNbPixelsAxeXChip8(int nbPixelsAxeXChip8) {
 		this.nbPixelsAxeXChip8 = nbPixelsAxeXChip8;
 	}
+
+	public void setKey(int key, boolean down) {
+		System.out.println(key);
+        if (key == -1) {
+            return;
+        }
+        this.keys[key] = down ? 1 : 0;
+    }
 
 }

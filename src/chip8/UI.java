@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.File;
 
 import javax.swing.ButtonGroup;
@@ -147,7 +148,7 @@ public class UI {
 		menuBar.add(menuAbout);
 		fenetreJeu.setJMenuBar(menuBar);
 
-		//Empêche de lancer l'émulateur sans une rom validée
+		//Emp�che de lancer l'émulateur sans une rom validée
 		do {
 			rom = this.selectRom();
 		}while (this.getRom() == null);
@@ -169,7 +170,23 @@ public class UI {
 		fenetreJeu.add(ecran);
 		fenetreJeu.revalidate();
 		fenetreJeu.repaint();
-		fenetreJeu.addKeyListener(touche);
+		fenetreJeu.addKeyListener(new KeyListener() {
+			
+			@Override
+			public void keyTyped(KeyEvent e) {
+			}
+			
+			@Override
+			public void keyReleased(KeyEvent e) {
+				chip8.setKey(translateKey(e.getKeyCode())-1,false);
+				
+			}
+			
+			@Override
+			public void keyPressed(KeyEvent e) {
+				chip8.setKey(translateKey(e.getKeyCode())-1,true);
+			}
+		});
 		fenetreJeu.setVisible(true);
 		rbVitesse2.setSelected(true);
 				
@@ -198,4 +215,44 @@ public class UI {
 	public File getRom() {
 		return this.rom;
 	}
+	
+	static int translateKey(int key) {
+		System.out.println(key);
+        switch (key) {
+        case KeyEvent.VK_1:
+			return 1;
+		case KeyEvent.VK_2:
+			return 2;
+		case KeyEvent.VK_3:
+			return 3;
+		case KeyEvent.VK_4:
+			return 4;
+		case KeyEvent.VK_A:
+			return 5;
+		case KeyEvent.VK_Z:
+			return 6;
+		case KeyEvent.VK_E:
+			return 7;
+		case KeyEvent.VK_R:
+			return 8;
+		case KeyEvent.VK_Q:
+			return 9;
+		case KeyEvent.VK_S:
+			return 10;
+		case KeyEvent.VK_D:
+			return 11;
+		case KeyEvent.VK_F:
+			return 12;
+		case KeyEvent.VK_W:
+			return 13;
+		case KeyEvent.VK_X:
+			return 14;
+		case KeyEvent.VK_C:
+			return 15;
+		case KeyEvent.VK_V:
+			return 16;
+        }
+        
+        return -1;
+    }
 }

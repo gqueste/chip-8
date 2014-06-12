@@ -37,8 +37,6 @@ public class Ecran extends JComponent{
 		Graphics2D pix = (Graphics2D) graph;
 		pix.setColor(couleurPixel);
 //		PixelChip8[][] pixels = new PixelChip8[64][32];
-		System.out.println("X = "+nbPixelsAxeX);
-		System.out.println("Y = "+nbPixelsAxeY);
 		for(int x = 0 ; x < nbPixelsAxeX ; ++x){
 			for(int y = 0 ; y < nbPixelsAxeY ; ++y){
 				if(ramGraphique[x][y] == 1){
