@@ -384,14 +384,16 @@ public class Chip8 {
 				/*
 				 * Set Vx = Vx + Vy, set VF = carry.
 				 */
-
-				V[opcodeNibble[1]] = (byte)(V[opcodeNibble[1]] + V[opcodeNibble[2]]);
-
-				if((V[opcodeNibble[1]] + V[opcodeNibble[2]]) > 255)
+				System.out.println(V[opcodeNibble[1]]);
+				System.out.println(V[opcodeNibble[2]]);
+				System.out.println((V[opcodeNibble[1]] + V[opcodeNibble[2]]));
+				if((V[opcodeNibble[1]] ) > (0xFF - V[opcodeNibble[2]])){
 					V[0xF] = 1;
+					System.out.println("Bla");
+				}
 				else
 					V[0xF] = 0;
-
+				V[opcodeNibble[1]] = (byte)(V[opcodeNibble[1]] + V[opcodeNibble[2]]);
 				break;
 			}
 
@@ -416,11 +418,9 @@ public class Chip8 {
 				/*
 				 * Set Vx = Vx SHR 1.
 				 */
-
-				int temp = V[opcodeNibble[2]] <= V[opcodeNibble[1]]? 0x01 : 0x00;
-				V[opcodeNibble[1]] = (byte) (V[opcodeNibble[1]] - V[opcodeNibble[2]]);
+				int temp = V[opcodeNibble[1]] & 1;
+				V[opcodeNibble[1]] = (byte) (V[opcodeNibble[1]] / 2);
 				V[0xF] = (byte) temp;
-
 				break;
 			}
 
@@ -444,9 +444,7 @@ public class Chip8 {
 
 				// Set flag register if MSb of Vx is set
 				V[0xF] = (((V[opcodeNibble[1]] & 0x80) >> 7) == 1) ? (byte)1 : 0;
-
 				V[opcodeNibble[1]] <<= 1;
-
 				break;
 			}
 
@@ -626,9 +624,7 @@ public class Chip8 {
 		}
 		for(short axeY = 0; axeY < last; axeY++){
 			short pixel = memory[I+axeY];
-			//				System.out.println(String.format("pixel : %x, %x", pixel, I+axeY));
 			for(short axeX = 0 ; axeX<8 ; axeX++){
-				//On vérifie que le pixel n'est pas hors de "l ecran"
 				if((pixel & (0x80>>axeX)) > 0 ){
 					if((x + axeX)>=nbPixelsAxeXChip8){
 						continue;
@@ -641,7 +637,6 @@ public class Chip8 {
 					}
 					display[y+axeY][x+axeX] ^= 1;
 				}
-				//					System.out.println(String.format("pixel : %x, %x", pixel, xPlace+axeX));
 			}
 		}
 	}
@@ -945,6 +940,14 @@ public class Chip8 {
 
 	public void setNbPixelsAxeXChip8(int nbPixelsAxeXChip8) {
 		this.nbPixelsAxeXChip8 = nbPixelsAxeXChip8;
+	}
+
+	public int[] getKeys() {
+		return keys;
+	}
+
+	public void setKeys(int[] keys) {
+		this.keys = keys;
 	}
 
 	public void setKey(int key, boolean down) {
