@@ -1,8 +1,7 @@
 package test;
 
-import static org.junit.Assert.*;
-
-import java.util.Arrays;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -482,16 +481,17 @@ public class OpcodeTest {
 	@Test
 	public void testFX07(){
 		byte[] VTemoins = new byte[16];
+		this.pcTemoin = chip8.getPC();
 		chip8.setV(VTemoins);
 		chip8.opcode(0xF707);
 		byte dTimer = (byte)chip8.getDelay_timer();
 		assertEquals("Le setter n'a pas fonctionné",dTimer,this.chip8.getV()[6]);
+		assertEquals("PC non incrémenté", pcTemoin+2, this.chip8.getPC());
 	}
 
 	@Test
-	public void testFX0A(){
+	public void testFX0A(){ //TODO
 		byte[] VTemoins = new byte[16];
-		ToucheListener touche = new ToucheListener();
 		chip8.setV(VTemoins);
 		chip8.opcode(0xF70A);
 		assertEquals("Le setter n'a pas fonctionné",0x07,this.chip8.getV()[7]);
@@ -501,38 +501,50 @@ public class OpcodeTest {
 	public void testFX15(){
 		byte[] VTemoins = new byte[16];
 		byte VxTemoin = (byte) 0x07;
+		this.pcTemoin = chip8.getPC();
 		VTemoins[9] = VxTemoin;
 		chip8.setV(VTemoins);
 		chip8.opcode(0xF915);
 		assertEquals("Le setter n'a pas fonctionné",(this.chip8.getV()[9] & 0xFF),this.chip8.getDelay_timer());
+		assertEquals("PC non incrémenté", pcTemoin+2, this.chip8.getPC());
 	}
 
 	@Test
 	public void testFX18(){
 		byte[] VTemoins = new byte[16];
 		byte VxTemoin = (byte) 0x07;
+		this.pcTemoin = chip8.getPC();
 		VTemoins[9] = VxTemoin;
 		chip8.setV(VTemoins);
 		chip8.opcode(0xF918);
 		assertEquals("Le setter n'a pas fonctionné",(this.chip8.getV()[9] & 0xFF),this.chip8.getSound_timer());
+		assertEquals("PC non incrémenté", pcTemoin+2, this.chip8.getPC());
 	}
 
 	@Test
 	public void testFX1E(){
 		byte[] VTemoins = new byte[16];
 		short tmpI = (short) chip8.getI();
+		this.pcTemoin = chip8.getPC();
 		chip8.setV(VTemoins);
 		chip8.opcode(0xF91E);
 		assertEquals("Le setter n'a pas fonctionné",chip8.getI(),tmpI+this.chip8.getV()[9]);
+		assertEquals("PC non incrémenté", pcTemoin+2, this.chip8.getPC());
 	}
 
 	@Test
 	public void testFX29(){
 		byte[] VTemoins = new byte[16];
+		this.pcTemoin = chip8.getPC();
 		chip8.setV(VTemoins);
 		chip8.opcode(0xF929);
 		assertEquals("Le setter n'a pas fonctionné",chip8.getI(),this.chip8.getV()[9]*5);
-
+		assertEquals("PC non incrémenté", pcTemoin+2, this.chip8.getPC());
+	}
+	
+	@Test
+	public void testFX30(){//TODO : rentré à la maison (+ refaire une rom sans le ret)
+		
 	}
 
 	@Test
