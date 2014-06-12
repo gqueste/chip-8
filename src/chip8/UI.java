@@ -30,6 +30,8 @@ public class UI {
 	private Chip8 chip8;
 	private Ecran ecran;
 	private Thread threadJeu;
+	private JMenu menuVitesse;
+	private ToucheListener touche;
 	private JRadioButtonMenuItem rbVitesse1;
 	private JRadioButtonMenuItem rbVitesse2;
 	private JRadioButtonMenuItem rbVitesse3;
@@ -42,9 +44,10 @@ public class UI {
 		fenetreJeu.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		fenetreJeu.setResizable(true);
 		fenetreJeu.getContentPane().setBackground(Color.BLACK);
+		this.rom = null;
 		
 		ecran = new Ecran(null,128,64);
-		fenetreJeu.add(ecran);
+		touche = new ToucheListener();
 	}
 	
 	/**
@@ -60,8 +63,10 @@ public class UI {
 			public void actionPerformed(ActionEvent evt) {
 				File romObtenue = selectRom();
 				if(romObtenue != null) {
-					chip8.setCycle(false);
-					threadJeu.interrupt();
+					if(rom != null) {
+						chip8.setCycle(false);
+						threadJeu.interrupt();
+					}
 					chargeRom(romObtenue);
 				}
 			}
@@ -70,7 +75,7 @@ public class UI {
 		menuRom.add(itemLoadRom);
 		
 		
-		JMenu menuVitesse = new JMenu("Vitesse");
+		menuVitesse = new JMenu("Vitesse");
 		menuVitesse.setMnemonic(KeyEvent.VK_V);
 		ButtonGroup groupVitesseButtons = new ButtonGroup();
 		rbVitesse1 = new JRadioButtonMenuItem("Vitesse / 2");
@@ -146,13 +151,18 @@ public class UI {
 		menuBar.add(menuAbout);
 		fenetreJeu.setJMenuBar(menuBar);
 
-		//Emp�che de lancer l'émulateur sans une rom validée
-		do {
-			rom = this.selectRom();
-		}while (this.getRom() == null);
+		//Charge une rom au lancement de l'application
+		File romtmp = this.selectRom();
 		
 		//Charge la rom validée
-		this.chargeRom(rom);		
+		if(romtmp != null) {
+			this.chargeRom(romtmp);
+			fenetreJeu.add(ecran);
+		}
+		else {
+			this.menuVitesse.setEnabled(false);
+			this.fenetreJeu.setVisible(true);
+		}
 	}
 
 	/**
@@ -160,6 +170,8 @@ public class UI {
 	 * @param romLancee, File, nouvelleRom sélectionnée
 	 */
 	public void chargeRom(File romLancee) {
+		this.menuVitesse.setEnabled(true);
+		this.rom = romLancee;
 		fenetreJeu.remove(ecran);
 		chip8 = new Chip8(romLancee);
 		chip8.lirePremierOpcode();
@@ -215,7 +227,6 @@ public class UI {
 	}
 	
 	static int translateKey(int key) {
-		System.out.println(key);
         switch (key) {
         case KeyEvent.VK_1:
 			return 1;

@@ -197,10 +197,12 @@ public class Chip8 {
 
 		int msb, lsb, total;
 
-		msb = (((int)memory[PC]) & 0xFF);
-		lsb = (((int)memory[PC + 1]) & 0xFF);
+		msb = ((memory[PC]));
+		System.out.println("msb = " + msb);
+		lsb = ((memory[PC + 1]) & 0xFF);
 		total = ((msb << 8) | lsb);
 		int opcodeRecupere = total;
+		System.out.println("Opcode recupere : " + String.format("%02X", opcodeRecupere));
 		opcode(opcodeRecupere);
 
 		if(delay_timer > 0){
@@ -220,7 +222,6 @@ public class Chip8 {
 	 * @param opcode, int
 	 */
 	public void opcode(int opcode){
-
 		int[] opcodeNibble = new int[4];
 		opcodeNibble[0] = ((opcode & 0xF000) >> 12);
 		opcodeNibble[1] = ((opcode & 0x0F00) >> 8);
@@ -302,7 +303,7 @@ public class Chip8 {
 			// Call a subroutine
 			stack[SP] = PC;
 			SP++;
-			PC = (short)(opcode & 0x0FFF);
+			PC = (opcode & 0x0FFF);
 			break;
 
 		case 0x3:
