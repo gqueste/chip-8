@@ -153,7 +153,7 @@ public class UI {
 		}while (this.getRom() == null);
 		
 		//Charge la rom validée
-		this.chargeRom(rom);		
+		this.chargeRom(rom);		//chip8-java-master
 	}
 
 	/**

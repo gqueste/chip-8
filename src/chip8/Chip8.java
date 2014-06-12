@@ -66,7 +66,7 @@ public class Chip8 {
 	 * @param touche
 	 */
 	public Chip8(File rom, ToucheListener touche) {
-		this.I = 0x0;
+		this.I = 0;
 		this.PC = 0;
 		this.SP = 0;
 		this.stack = new int[16];
@@ -198,10 +198,12 @@ public class Chip8 {
 
 		int msb, lsb, total;
 
-		msb = (((int)memory[PC]) & 0xFF);
-		lsb = (((int)memory[PC + 1]) & 0xFF);
+		msb = ((memory[PC]));
+		System.out.println("msb = " + msb);
+		lsb = ((memory[PC + 1]) & 0xFF);
 		total = ((msb << 8) | lsb);
 		int opcodeRecupere = total;
+		System.out.println("Opcode recupere : " + String.format("%02X", opcodeRecupere));
 		opcode(opcodeRecupere);
 
 		if(delay_timer > 0){
@@ -221,7 +223,7 @@ public class Chip8 {
 	 * @param opcode, int
 	 */
 	public void opcode(int opcode){
-
+		
 		int x = ((opcode & 0x0F00) >> 8);
 		int y = ((opcode & 0x00F0) >> 4);
 		int kk = (opcode & 0xFF);
@@ -230,7 +232,7 @@ public class Chip8 {
 		int first = opcode & 0xF000;
 		int last = opcode & 0x000F;
 
-		//		System.out.println("Opcode : " +  String.format("0x%4s", Integer.toHexString(opcode)).replace(' ', '0'));
+		System.out.println("Opcode : " +  String.format("0x%4s", Integer.toHexString(opcode)).replace(' ', '0'));
 		switch (first) {
 		case 0x0000 :
 			if(x != 0x0000) {
@@ -302,7 +304,7 @@ public class Chip8 {
 			// Call a subroutine
 			stack[SP] = PC;
 			SP++;
-			PC = (short)(opcode & 0x0FFF);
+			PC = (opcode & 0x0FFF);
 			break;
 
 		case 0x3000:
@@ -616,7 +618,7 @@ public class Chip8 {
 				I = (short)(V[x]*10);
 				break;
 			case 0x33:
-				//On stock la représentation BCD du registre vr dans I,I+1,I+2
+				//On stock la reprï¿½sentation BCD du registre vr dans I,I+1,I+2
 				byte number = this.V[x];
 
                 for (int i = 3; i > 0; i--) {
